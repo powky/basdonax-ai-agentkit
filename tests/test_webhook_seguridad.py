@@ -37,6 +37,7 @@ class CanalFalso:
         self.enviados = []
         self.clasificados = []
         self.tomada = False  # si alguien del equipo puso la etiqueta
+        self.traspasos = []  # (conversacion, motivo)
 
     def traducir(self, evento):
         from agente.canales.base import MensajeEntrante
@@ -73,6 +74,9 @@ class CanalFalso:
 
     def la_atiende_una_persona(self, conversacion):
         return self.tomada
+
+    def pasar_a_una_persona(self, conversacion, motivo):
+        self.traspasos.append((conversacion, motivo))
 
 
 def armar(canales=(), secreto="", canal="whatsapp", hacer_agente=None):
@@ -254,6 +258,61 @@ def test_si_nadie_la_tomo_contesta_normal():
     cliente.post(f"/chatwoot/{TOKEN}", json=evento("hola"))
 
     assert canal.enviados == [("42", ["eco: hola"])]
+
+
+# -- Cuando el catálogo no se puede consultar ---------------------------------
+
+
+def test_si_fallo_una_consulta_deja_nota_y_la_pasa(monkeypatch):
+    """Contestar sin poder mirar el catálogo no puede quedar como si nada.
+
+    El peor error que podemos cometer es decirle a alguien que su
+    universidad no está cuando sí está. Si el agente contestó a ciegas, la
+    conversación pasa a una persona con una nota que dice por qué.
+    """
+    from agente.web import webhook as modulo
+
+    monkeypatch.setattr(modulo, "consulta_fallida", lambda c: "list_universities")
+    cliente, canal = armar()
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert canal.enviados, "primero contesta"
+    assert len(canal.traspasos) == 1
+    conversacion, motivo = canal.traspasos[0]
+    assert conversacion == "42"
+    assert "list_universities" in motivo
+
+
+def test_con_el_catalogo_caido_tambien_la_pasa(monkeypatch):
+    from agente.web import webhook as modulo
+
+    monkeypatch.setattr(modulo, "catalogo_caido", lambda: True)
+    cliente, canal = armar()
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert len(canal.traspasos) == 1
+    assert "catálogo" in canal.traspasos[0][1]
+
+
+def test_si_el_catalogo_anduvo_no_molesta_a_nadie(monkeypatch):
+    """El otro lado: que no llene la bandeja de traspasos por las dudas.
+
+    Las dos condiciones se declaran acá y no se heredan: `catalogo_caido` es
+    estado del proceso —en producción se decide una vez, al arrancar— y otro
+    test que probó una conexión fallida lo deja encendido.
+    """
+    from agente.web import webhook as modulo
+
+    monkeypatch.setattr(modulo, "catalogo_caido", lambda: False)
+    monkeypatch.setattr(modulo, "consulta_fallida", lambda c: "")
+    cliente, canal = armar()
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert canal.enviados
+    assert canal.traspasos == []
 
 
 def test_firma_valida_rechaza_basura():

@@ -76,3 +76,11 @@ class Canal(ABC):
         no tiene a quién traspasarle nada.
         """
         return False
+
+    def pasar_a_una_persona(self, conversacion: str, motivo: str) -> None:
+        """Deja la conversación para que la siga alguien del equipo.
+
+        El `motivo` es para adentro, no para el cliente: explica por qué el
+        bot se aparta. Un canal sin bandeja no tiene dónde dejarlo, así que
+        por defecto esto no hace nada.
+        """

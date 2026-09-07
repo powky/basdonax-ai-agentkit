@@ -365,6 +365,29 @@ class Chatwoot(Canal):
                 {"content": texto, "message_type": "outgoing"},
             )
 
+    def pasar_a_una_persona(self, conversacion: str, motivo: str) -> None:
+        """Deja una nota interna y pone la etiqueta de traspaso.
+
+        La nota es `private`: sale en la bandeja y NO le llega al cliente.
+        Sirve para que quien abra la conversación sepa de una por qué está
+        ahí, en vez de tener que deducirlo leyendo el hilo.
+
+        La etiqueta va después de la nota y no antes: es la misma que apaga
+        al bot, así que ponerla primero haría que el propio mensaje que
+        estamos por mandar se quede sin salir.
+        """
+        try:
+            self._api(
+                "POST",
+                f"conversations/{conversacion}/messages",
+                {"content": motivo, "message_type": "outgoing", "private": True},
+            )
+        except Exception as e:
+            print(f"[chatwoot] no se pudo dejar la nota en {conversacion}: {e}")
+
+        if self.etiqueta_humano:
+            self._etiquetar(conversacion, [self.etiqueta_humano])
+
     def escribiendo(self, conversacion: str, encendido: bool = True) -> None:
         """El "escribiendo..." mientras el modelo piensa.
 

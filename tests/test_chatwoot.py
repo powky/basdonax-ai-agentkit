@@ -192,6 +192,36 @@ def test_por_id_las_otras_etiquetas_no_lo_apagan():
     assert canal.la_atiende_una_persona("33") is False
 
 
+def test_el_traspaso_deja_nota_privada_y_etiqueta():
+    """La nota es para la bandeja, no para el cliente."""
+    canal = ChatwootFalso()
+
+    canal.pasar_a_una_persona("33", "no pude consultar el catálogo")
+
+    notas = [
+        l for l in canal.llamadas
+        if l["camino"].endswith("/messages") and l["datos"]
+    ]
+    assert len(notas) == 1
+    assert notas[0]["datos"]["private"] is True, "al cliente no le llega"
+    assert notas[0]["datos"]["content"] == "no pude consultar el catálogo"
+
+    etiquetados = [l for l in canal.llamadas if l["camino"].endswith("/labels")]
+    assert any(l["metodo"] == "POST" for l in etiquetados), "y queda etiquetada"
+
+
+def test_el_traspaso_no_le_pisa_las_etiquetas_que_ya_tenia():
+    canal = ChatwootFalso(etiquetas_remotas=["ventas"])
+
+    canal.pasar_a_una_persona("33", "motivo")
+
+    puesta = [
+        l for l in canal.llamadas
+        if l["camino"].endswith("/labels") and l["metodo"] == "POST"
+    ]
+    assert puesta[0]["datos"]["labels"] == ["ventas", "humano"]
+
+
 def test_un_mensaje_normal_se_contesta():
     canal = ChatwootFalso()
     assert canal.deberia_responder(canal.traducir(evento())) is True

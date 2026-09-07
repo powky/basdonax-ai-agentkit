@@ -40,6 +40,34 @@ _loop: asyncio.AbstractEventLoop | None = None
 _hilo: threading.Thread | None = None
 _candado = threading.Lock()
 
+# El catálogo estaba configurado y no se pudo conectar. Es distinto de "no hay
+# MCP": si nadie lo configuró, el agente no tiene por qué avisar nada.
+_caido = False
+
+# En qué conversaciones falló una consulta, y cuál. Se anota acá y no en un
+# contextvar porque quien lo escribe corre en otro hilo (asyncio.to_thread
+# copia el contexto, así que lo que se cambia adentro no vuelve).
+_fallidas: dict[str, str] = {}
+
+
+def catalogo_caido() -> bool:
+    """Si el catálogo está configurado pero hoy no se puede consultar."""
+    return _caido
+
+
+def anotar_consulta_fallida(conversacion: str, detalle: str) -> None:
+    if conversacion:
+        _fallidas[conversacion] = detalle
+
+
+def consulta_fallida(conversacion: str) -> str:
+    """Qué consulta falló en esa conversación. Se lee una sola vez.
+
+    Se consume a propósito: el aviso es por respuesta, no por conversación.
+    Si quedara pegado, cada mensaje siguiente volvería a avisar lo mismo.
+    """
+    return _fallidas.pop(conversacion, "")
+
 
 def _loop_de_fondo() -> asyncio.AbstractEventLoop:
     """El event loop donde viven la conexión MCP y sus llamadas."""
@@ -82,6 +110,7 @@ def cargar_herramientas(url: str, token: str = "") -> list:
         from langchain_mcp_adapters.client import MultiServerMCPClient
     except ImportError:  # pragma: no cover - depende del requirements instalado
         registro.error("Falta langchain-mcp-adapters: el agente arranca sin tools del MCP.")
+        _marcar_caido(True)
         return []
 
     conexion: dict[str, Any] = {"url": url, "transport": "streamable_http"}
@@ -93,8 +122,10 @@ def cargar_herramientas(url: str, token: str = "") -> list:
         tools = _esperar(cliente.get_tools(), espera=30)
     except Exception as e:
         registro.error("No se pudo conectar al MCP (%s): %s", url, e)
+        _marcar_caido(True)
         return []
 
+    _marcar_caido(False)
     envueltas = [_envolver(t) for t in tools]
     registro.info("MCP conectado: %s tool(s) — %s", len(envueltas), ", ".join(t.name for t in envueltas))
     return envueltas
@@ -127,7 +158,26 @@ def _envolver(tool):
             canal = canal_actual.get()
             if canal:
                 kwargs["channel"] = canal
-        return _esperar(corrutina(*args, **kwargs))
+        try:
+            return _esperar(corrutina(*args, **kwargs))
+        except Exception as e:
+            # Que una consulta falle no puede voltear la respuesta entera. El
+            # modelo recibe un texto honesto —que además le dice qué hacer— y
+            # sigue; y queda anotado para que el webhook le pase la
+            # conversación a una persona en vez de dejar una respuesta a
+            # medias como si nada hubiera pasado.
+            registro.error("La tool %s falló: %s", tool.name, e)
+            anotar_consulta_fallida(conversacion_actual.get(), tool.name)
+            return (
+                "No se pudo consultar el catálogo de Studiante en este momento. "
+                "No inventes la respuesta ni afirmes que algo no está: decile a "
+                "la persona que lo vas a confirmar con el equipo."
+            )
 
     tool.func = sincrono
     return tool
+
+
+def _marcar_caido(caido: bool) -> None:
+    global _caido
+    _caido = caido

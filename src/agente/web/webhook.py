@@ -46,6 +46,7 @@ from langchain_core.tools import StructuredTool
 from ..canales.chatwoot import Chatwoot
 from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
+from ..mcp import catalogo_caido, consulta_fallida
 
 registro = logging.getLogger("agente.webhook")
 
@@ -187,6 +188,42 @@ def crear_app(
                 await asyncio.to_thread(canal.escribiendo, conversacion, False)
 
             registro.info("[%s] -> %s mensaje(s)", conversacion, len(mensajes))
+
+            # Si contestó a ciegas, no se queda como si nada: queda una nota
+            # interna y la conversación pasa a una persona. Va DESPUÉS de
+            # enviar porque el traspaso pone la etiqueta que apaga al bot, y
+            # ponerla antes dejaría a la persona esperando una respuesta que
+            # ya estaba escrita.
+            motivo = _por_que_pasarla(conversacion)
+            if motivo:
+                registro.info("[%s] la paso a una persona: %s", conversacion, motivo)
+                await asyncio.to_thread(canal.pasar_a_una_persona, conversacion, motivo)
+
+    def _por_que_pasarla(conversacion: str) -> str:
+        """Si esta respuesta salió sin poder consultar el catálogo, con qué
+        texto se avisa en la bandeja.
+
+        Son los dos casos en que el agente habla del catálogo sin verlo:
+        una consulta que falló en el medio, o el MCP caído desde que arrancó.
+        En los dos el riesgo es el mismo y es el peor que tenemos: decirle a
+        alguien que su universidad no está cuando sí está.
+        """
+        fallo = consulta_fallida(conversacion)
+        if fallo:
+            return (
+                f"El agente no pudo consultar el catálogo ({fallo}) al responder "
+                "este mensaje, así que puede haber contestado de menos. Lo dejo "
+                "para que lo revise una persona."
+            )
+
+        if catalogo_caido():
+            return (
+                "El agente está sin acceso al catálogo de universidades y "
+                "pensums, así que no puede confirmar qué hay en la app. Lo dejo "
+                "para que lo siga una persona."
+            )
+
+        return ""
 
     def _clasificar(entrante) -> None:
         """Guarda en Chatwoot lo que la app haya mandado en el mensaje."""

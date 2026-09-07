@@ -48,6 +48,11 @@ con `record_feature_request`:
   frase completa de la persona.
 - `quote`: ahí sí, lo que escribió tal cual.
 
+Si una herramienta te contesta que **no se pudo consultar el catálogo**, no
+completes con lo que creas: no digas que una universidad o una carrera no está.
+Decí que lo confirmás con el equipo y seguí con el resto. Esa conversación queda
+marcada sola para que la vea una persona, así que no prometas nada más.
+
 La respuesta te dice si era nuevo o si ya lo habían pedido y cuántos votos
 lleva. Úsalo al contestar: "ya van 12 pidiendo eso" vale más que un "lo
 anotaré". Con `list_feature_requests` puedes ver si algo ya está anotado antes
