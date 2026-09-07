@@ -38,6 +38,7 @@ from fastapi.responses import JSONResponse
 from ..agente import Agente
 from ..canales.buffer import BufferDeMensajes
 from ..canales.chatwoot import Chatwoot
+from ..contexto import canal_actual
 from ..config import Config
 
 registro = logging.getLogger("agente.webhook")
@@ -78,6 +79,10 @@ def crear_app(
         async with candados[conversacion]:
             registro.info("[%s] %s", conversacion, texto.replace("\n", " | ")[:200])
 
+            # Por dónde entró: lo usan las tools del MCP para anotar de qué
+            # canal salió cada pedido.
+            canal_actual.set(canal.canal_de(conversacion))
+
             # El "escribiendo..." y el agente son código bloqueante (urllib y
             # el modelo). Van a un hilo aparte para no trabar el servidor:
             # mientras este mensaje se piensa, los demás siguen entrando.
@@ -106,6 +111,20 @@ def crear_app(
                 await asyncio.to_thread(canal.escribiendo, conversacion, False)
 
             registro.info("[%s] -> %s mensaje(s)", conversacion, len(mensajes))
+
+    def _clasificar(entrante) -> None:
+        """Guarda en Chatwoot lo que la app haya mandado en el mensaje."""
+        try:
+            ficha = canal.clasificar(entrante)
+            if not ficha.vacia():
+                registro.info(
+                    "[%s] ficha: %s", entrante.conversacion,
+                    ", ".join(f"{k}={v}" for k, v in ficha.atributos().items()) or ficha.motivo,
+                )
+        except Exception as e:
+            # Clasificar es un extra: que falle no puede dejar sin respuesta a
+            # la persona, que es lo que sigue en el flujo principal.
+            registro.error("[%s] no se pudo clasificar: %s", entrante.conversacion, e)
 
     buffer = BufferDeMensajes(config.buffer_segundos, responder)
 
@@ -156,6 +175,14 @@ def crear_app(
             return JSONResponse({"error": "esperaba JSON"}, status_code=400)
 
         entrante = canal.traducir(evento)
+
+        # La ficha se guarda ANTES de decidir si el agente contesta, y a
+        # propósito: si una persona tomó la conversación, los datos del equipo
+        # le sirven igual —o más— para diagnosticar. Va a un hilo porque son
+        # dos o tres llamadas a la API de Chatwoot y el webhook tiene que
+        # contestar ya.
+        if entrante is not None:
+            asyncio.create_task(asyncio.to_thread(_clasificar, entrante))
 
         if entrante is None or not canal.deberia_responder(entrante):
             # No es un error: es la mayoría de lo que llega. Cada respuesta

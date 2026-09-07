@@ -35,6 +35,7 @@ import urllib.request
 from collections import deque
 
 from .base import Canal, MensajeEntrante
+from .ficha import Ficha, leer_ficha
 
 # Cuánto esperamos a que Chatwoot conteste. Corre en el mismo servidor que
 # el agente, así que si tarda más que esto es porque algo anda mal.
@@ -74,6 +75,12 @@ class Chatwoot(Canal):
         # mismo. Alcanza con acordarse de los últimos.
         self._ya_contestados: deque[str] = deque(maxlen=1000)
 
+        # De qué canal es cada conversación (whatsapp, instagram, email…). Se
+        # anota al traducir el evento porque después, cuando el agente
+        # responde, el evento ya no está a mano — y el pedido que anote tiene
+        # que saber por dónde entró.
+        self._canales: dict[str, str] = {}
+
     # -- Entrada ---------------------------------------------------------------
 
     def traducir(self, evento: dict) -> MensajeEntrante | None:
@@ -92,6 +99,8 @@ class Chatwoot(Canal):
 
         if not id_conversacion or not texto:
             return None
+
+        self._canales[str(id_conversacion)] = _canal_de(evento)
 
         return MensajeEntrante(
             texto=texto,
@@ -176,6 +185,106 @@ class Chatwoot(Canal):
 
         return respuesta.get("payload") or []
 
+    def canal_de(self, conversacion: str) -> str:
+        """Por dónde entró esa conversación: whatsapp, instagram, email, web."""
+        return self._canales.get(str(conversacion), "")
+
+    # -- Clasificación ---------------------------------------------------------
+
+    def clasificar(self, mensaje: MensajeEntrante) -> Ficha:
+        """Guarda en Chatwoot lo que la app haya mandado en el mensaje.
+
+        Cuando alguien escribe desde la app, el mensaje trae versión, sistema,
+        equipo, correo y a veces universidad y carrera (ver ficha.py). Eso se
+        escribe en el contacto y la conversación queda etiquetada con el motivo
+        —reporte, pensum-faltante, pensum-con-error— para que la bandeja se
+        pueda filtrar sin que nadie clasifique a mano.
+
+        Corre para TODOS los mensajes que entran, incluso los que el agente no
+        va a contestar porque una persona tomó la conversación: la ficha es
+        igual de útil para quien atiende a mano.
+
+        Nada de esto puede tumbar la respuesta: si Chatwoot rechaza el correo
+        por duplicado o la llamada falla, queda en los logs y se sigue.
+        """
+        ficha = leer_ficha(mensaje.texto)
+        if ficha.vacia():
+            return ficha
+
+        evento = mensaje.datos or {}
+        conversacion = evento.get("conversation") or {}
+        id_conversacion = conversacion.get("id")
+
+        contacto = (
+            (conversacion.get("meta") or {}).get("sender")
+            or evento.get("sender")
+            or {}
+        )
+        id_contacto = contacto.get("id")
+
+        if id_contacto:
+            self._actualizar_contacto(id_contacto, ficha, contacto)
+        if id_conversacion and ficha.etiquetas:
+            self._etiquetar(id_conversacion, ficha.etiquetas)
+
+        return ficha
+
+    def _actualizar_contacto(self, id_contacto, ficha: Ficha, actual: dict) -> None:
+        """Escribe correo y atributos en el contacto, sin pisar lo que ya hay."""
+        cambios: dict = {}
+
+        # El correo solo se escribe si el contacto no tiene: sobreescribirlo
+        # con el de otra sesión mezclaría dos personas en un mismo contacto.
+        if ficha.correo and not (actual.get("email") or "").strip():
+            cambios["email"] = ficha.correo
+
+        atributos = ficha.atributos()
+        if atributos:
+            # Los de antes se conservan: un segundo mensaje sin universidad no
+            # puede borrar la que se leyó en el primero.
+            previos = actual.get("custom_attributes") or {}
+            cambios["custom_attributes"] = {**previos, **atributos}
+
+        if not cambios:
+            return
+
+        try:
+            self._api("PUT", f"contacts/{id_contacto}", cambios)
+        except Exception as e:
+            # El caso típico: el correo ya existe en otro contacto y Chatwoot
+            # contesta 422. Se reintenta sin el correo, que los atributos del
+            # equipo son lo que más se usa para diagnosticar.
+            if "email" in cambios:
+                cambios.pop("email")
+                if cambios:
+                    try:
+                        self._api("PUT", f"contacts/{id_contacto}", cambios)
+                        return
+                    except Exception as e2:
+                        e = e2
+            print(f"[chatwoot] no se pudo actualizar el contacto {id_contacto}: {e}")
+
+    def _etiquetar(self, id_conversacion, etiquetas: list[str]) -> None:
+        """Suma etiquetas a la conversación.
+
+        La API de Chatwoot REEMPLAZA la lista completa, así que primero hay que
+        leer las que ya tiene: mandar solo la nueva le borraría la etiqueta
+        `humano` a una conversación que alguien tomó, y el bot volvería a
+        hablar encima.
+        """
+        try:
+            actuales = self._etiquetas_de(id_conversacion)
+            faltantes = [e for e in etiquetas if e not in actuales]
+            if not faltantes:
+                return
+            self._api(
+                "POST",
+                f"conversations/{id_conversacion}/labels",
+                {"labels": list(actuales) + faltantes},
+            )
+        except Exception as e:
+            print(f"[chatwoot] no se pudo etiquetar la conversación {id_conversacion}: {e}")
+
     # -- Salida ----------------------------------------------------------------
 
     def enviar(self, conversacion: str, mensajes: list[str]) -> None:
@@ -248,6 +357,20 @@ class Chatwoot(Canal):
 
 
 # -- Ayudantes ----------------------------------------------------------------
+
+
+def _canal_de(evento: dict) -> str:
+    """De "Channel::Whatsapp" a "whatsapp". Vacío si Chatwoot no lo manda."""
+    conversacion = evento.get("conversation") or {}
+    crudo = (
+        (conversacion.get("channel") or "")
+        or ((evento.get("inbox") or {}).get("channel_type") or "")
+    )
+    if not crudo:
+        return ""
+    corto = str(crudo).rsplit("::", 1)[-1].lower()
+    # Los nombres que usa Chatwoot para lo mismo, unificados.
+    return {"twilipsms": "sms", "api": "api", "webwidget": "web"}.get(corto, corto)
 
 
 def _tipo_de_mensaje(evento: dict) -> str:

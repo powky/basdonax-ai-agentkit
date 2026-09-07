@@ -114,7 +114,11 @@ def clima(lugar: str) -> str:
 
 # Lo que el agente tiene atado. Cuando agregues otra herramienta, sumala acá:
 # es la única lista que mira el grafo.
-HERRAMIENTAS = [clima]
+# El clima queda en el archivo como ejemplo del kit, pero NO se registra: este
+# agente atiende el soporte de Studiante, y cada tool que se le cuelga es
+# descripción que viaja en cada mensaje y una puerta más para distraerlo. Lo
+# que sí usa vive en el MCP (ver mcp.py).
+HERRAMIENTAS: list = []
 
 
 # -- Las consultas ------------------------------------------------------------

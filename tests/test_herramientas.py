@@ -110,9 +110,12 @@ def test_el_nombre_completo_no_deja_comas_sueltas():
     assert herramientas._nombre_completo(solo) == "Madrid, España"
 
 
-def test_la_herramienta_esta_en_la_lista_que_mira_el_grafo():
-    """Si no está acá, el modelo no se entera de que existe."""
-    assert clima in HERRAMIENTAS
+def test_el_clima_no_se_le_cuelga_al_agente_de_soporte():
+    """El clima es el ejemplo del kit y se queda en el repo, pero NO se
+    registra: este agente atiende el soporte de Studiante, y cada tool que se
+    le cuelga es descripción que viaja en cada mensaje y una puerta más para
+    distraerlo. Las que sí usa vienen del MCP (ver src/agente/mcp.py)."""
+    assert clima not in HERRAMIENTAS
 
 
 def test_el_modelo_recibe_una_descripcion_util():

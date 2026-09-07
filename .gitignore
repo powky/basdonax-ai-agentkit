@@ -39,3 +39,4 @@ datos/
 *.db
 *.sqlite3
 _vista-previa.html
+.venv/

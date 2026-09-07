@@ -38,7 +38,10 @@ Lo que importa acá es qué hace cada uno:
 | Archivo | Qué resuelve |
 |---|---|
 | `agente.py` | **El agente.** El grafo de LangGraph. Empezá por acá. |
-| `herramientas.py` | Lo que el agente puede hacer además de conversar. Hoy: el clima. |
+| `herramientas.py` | Tools locales. Hoy ninguna: el clima quedó como ejemplo, sin registrar. |
+| `mcp.py` | **Las tools de verdad**: el catálogo y el buzón de pedidos, vía el MCP acotado |
+| `contexto.py` | De qué conversación y canal es el mensaje que se atiende (para las tools) |
+| `canales/ficha.py` | Lee la ficha que manda la app (versión, equipo, universidad) |
 | `modelos.py` | Crea el modelo y le pregunta al proveedor cuáles tiene |
 | `memoria.py` | Los checkpointers: `ram` / `sqlite` / `postgres` |
 | `prompts.py` | Lee y guarda `prompts/sistema.md` |

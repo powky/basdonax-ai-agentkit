@@ -67,6 +67,11 @@ class Config:
     chatwoot_webhook_token: str = ""
     # Cuánto espera juntando la ráfaga antes de contestar (ver buffer.py).
     buffer_segundos: int = 8
+    # El MCP acotado de Studiante: el catálogo y el buzón de pedidos. Vacío =
+    # el agente arranca igual, solo que sin esas tools (la web y los tests).
+    mcp_url: str = ""
+    mcp_token: str = ""
+
 
     @classmethod
     def desde_entorno(
@@ -128,6 +133,8 @@ class Config:
                 os.getenv("CHATWOOT_WEBHOOK_TOKEN") or ""
             ).strip(),
             buffer_segundos=_entero("BUFFER_SEGUNDOS", 8),
+            mcp_url=(os.getenv("MCP_URL") or "").strip(),
+            mcp_token=(os.getenv("MCP_TOKEN") or "").strip(),
         )
 
 

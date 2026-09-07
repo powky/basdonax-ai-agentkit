@@ -33,6 +33,8 @@ from langgraph.prebuilt import ToolNode, tools_condition
 
 from .config import Config
 from .herramientas import HERRAMIENTAS
+from .contexto import conversacion_actual
+from .mcp import cargar_herramientas
 from .memoria import crear_memoria
 from .modelos import crear_modelo
 from .prompts import leer_prompt
@@ -113,7 +115,19 @@ class Agente:
         # Se le puede pasar otra a mano (los tests le pasan una en RAM).
         self.checkpointer = checkpointer or crear_memoria(self.config)
 
+        # Las tools no son una constante del módulo: dependen de si hay un MCP
+        # configurado. Se resuelven UNA vez, al armar el agente, y no por
+        # mensaje — reconectar el MCP en cada pregunta sería pagar el saludo
+        # completo para leer una lista de universidades.
+        self.herramientas = list(HERRAMIENTAS) + cargar_herramientas(
+            self.config.mcp_url, self.config.mcp_token
+        )
+
         self.grafo = self._construir_grafo()
+
+    # Las tools por defecto, para quien arme el agente por partes sin pasar
+    # por __init__ (los tests del kit hacen eso con un modelo falso).
+    herramientas: list = HERRAMIENTAS
 
     # -- El grafo -------------------------------------------------------------
 
@@ -122,7 +136,7 @@ class Agente:
 
         # bind_tools() es lo que le avisa al modelo qué herramientas existe.
         # Sin esto nunca las pide, por más que estén escritas.
-        modelo = self.modelo.bind_tools(HERRAMIENTAS)
+        modelo = self.modelo.bind_tools(self.herramientas)
 
         def nodo_modelo(estado: MessagesState) -> dict:
             respuesta = modelo.invoke(self._armar_entrada(estado))
@@ -130,7 +144,7 @@ class Agente:
 
         grafo = StateGraph(MessagesState)
         grafo.add_node("modelo", nodo_modelo)
-        grafo.add_node("herramientas", ToolNode(HERRAMIENTAS))
+        grafo.add_node("herramientas", ToolNode(self.herramientas))
         grafo.add_edge(START, "modelo")
 
         # tools_condition mira la respuesta del modelo: si pidió herramientas
@@ -197,10 +211,18 @@ class Agente:
         una conversación separada, con su propia memoria. En Telegram o
         WhatsApp acá va el número o el chat_id de la persona.
         """
-        salida = self.grafo.invoke(
-            {"messages": [HumanMessage(texto)]},
-            config=self._config_hilo(conversacion),
-        )
+        # De qué conversación es esto lo necesitan las tools del MCP para
+        # dejar el pedido atado al chat de donde salió (ver contexto.py). Va
+        # por contextvar y no por el prompt: el modelo no tiene ese dato y lo
+        # inventaría.
+        marca = conversacion_actual.set(conversacion)
+        try:
+            salida = self.grafo.invoke(
+                {"messages": [HumanMessage(texto)]},
+                config=self._config_hilo(conversacion),
+            )
+        finally:
+            conversacion_actual.reset(marca)
         return _a_respuesta(salida["messages"][-1], self.config.modelo)
 
     def responder_en_vivo(
