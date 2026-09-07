@@ -270,10 +270,10 @@ def test_si_fallo_una_consulta_deja_nota_y_la_pasa(monkeypatch):
     universidad no está cuando sí está. Si el agente contestó a ciegas, la
     conversación pasa a una persona con una nota que dice por qué.
     """
-    from agente.web import webhook as modulo
+    from agente import traspaso
 
-    monkeypatch.setattr(modulo, "consulta_fallida", lambda c: "list_universities")
     cliente, canal = armar()
+    traspaso.pedir("42", "no se pudo consultar el catálogo (list_universities)")
 
     cliente.post(f"/chatwoot/{TOKEN}", json=evento())
 
@@ -299,14 +299,13 @@ def test_con_el_catalogo_caido_tambien_la_pasa(monkeypatch):
 def test_si_el_catalogo_anduvo_no_molesta_a_nadie(monkeypatch):
     """El otro lado: que no llene la bandeja de traspasos por las dudas.
 
-    Las dos condiciones se declaran acá y no se heredan: `catalogo_caido` es
-    estado del proceso —en producción se decide una vez, al arrancar— y otro
-    test que probó una conexión fallida lo deja encendido.
+    `catalogo_caido` se declara acá y no se hereda: es estado del proceso —en
+    producción se decide una vez, al arrancar— y otro test que probó una
+    conexión fallida lo deja encendido.
     """
     from agente.web import webhook as modulo
 
     monkeypatch.setattr(modulo, "catalogo_caido", lambda: False)
-    monkeypatch.setattr(modulo, "consulta_fallida", lambda c: "")
     cliente, canal = armar()
 
     cliente.post(f"/chatwoot/{TOKEN}", json=evento())

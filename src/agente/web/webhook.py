@@ -46,7 +46,8 @@ from langchain_core.tools import StructuredTool
 from ..canales.chatwoot import Chatwoot
 from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
-from ..mcp import catalogo_caido, consulta_fallida
+from ..mcp import catalogo_caido
+from .. import traspaso
 
 registro = logging.getLogger("agente.webhook")
 
@@ -108,6 +109,29 @@ def crear_app(
     # La única tool que depende del canal: el resto vive en el MCP. La
     # conversación no la pasa el modelo —no la conoce— sino el contextvar que
     # deja puesto `responder` unas líneas más abajo.
+    def pedir_una_persona(motivo: str) -> str:
+        """La deja anotada; el traspaso lo hace el webhook al terminar."""
+        traspaso.pedir(conversacion_actual.get(), motivo)
+        return (
+            "Listo: la conversación queda para el equipo. Decile a la persona "
+            "que alguien la retoma, sin prometer cuándo, y no sigas intentando "
+            "resolverlo vos."
+        )
+
+    herramienta_persona = StructuredTool.from_function(
+        func=pedir_una_persona,
+        name="pasar_a_una_persona",
+        description=(
+            "Deja la conversación para que la siga alguien del equipo. Úsala "
+            "cuando el tema no lo podés resolver vos: piden hablar con una "
+            "persona, están molestos, reclaman datos incorrectos, piden que "
+            "conectemos una universidad o un portal nuevo, o es prensa, una "
+            "universidad, algo comercial o legal. El `motivo` es una nota "
+            "interna que solo ve el equipo: escribí en una línea qué necesita "
+            "y con qué datos, no la conversación entera."
+        ),
+    )
+
     herramienta_nombre = StructuredTool.from_function(
         func=guardar_nombre,
         name="guardar_nombre",
@@ -121,7 +145,9 @@ def crear_app(
     # El agente se arma una sola vez y atiende a todo el mundo. Es lo que
     # queremos: adentro tiene la conexión a Postgres, y armarlo por mensaje
     # sería abrir una conexión nueva cada vez.
-    agente = agente or Agente(config, herramientas_extra=[herramienta_nombre])
+    agente = agente or Agente(
+        config, herramientas_extra=[herramienta_nombre, herramienta_persona]
+    )
 
     # Un candado por conversación. Dos personas distintas se atienden a la
     # vez sin problema, pero dos mensajes de la MISMA persona no: si se
@@ -158,13 +184,21 @@ def crear_app(
                     agente.responder_partido, texto, conversacion
                 )
             except Exception as e:
-                # El error del proveedor no se esconde: se lo decimos a la
-                # persona y queda en los logs. Pero no volteamos el servidor,
-                # porque atiende a varias personas y una falla con una no
-                # puede dejar sin respuesta a las demás.
+                # El error del proveedor NO se le manda al cliente: un
+                # "RateLimitError: quota exceeded" no le dice nada a un
+                # estudiante y nos hace ver rotos. La persona recibe una
+                # línea humana, y el error de verdad va a los logs y a una
+                # nota privada, que es donde sirve.
                 aviso = f"{type(e).__name__}: {e}"
                 registro.error("[%s] %s", conversacion, aviso)
-                mensajes = [f"Se me rompió algo: {aviso}"]
+                mensajes = [
+                    "Se me complicó procesarlo ahora mismo. Ya alguien del "
+                    "equipo lo retoma 🙏🏻"
+                ]
+                traspaso.pedir(
+                    conversacion,
+                    f"El agente no pudo generar la respuesta: {aviso}",
+                )
 
             # Segunda mirada, y no es de más: pensar la respuesta puede
             # llevarse veinte segundos cuando el modelo consulta el catálogo.
@@ -203,18 +237,15 @@ def crear_app(
         """Si esta respuesta salió sin poder consultar el catálogo, con qué
         texto se avisa en la bandeja.
 
-        Son los dos casos en que el agente habla del catálogo sin verlo:
-        una consulta que falló en el medio, o el MCP caído desde que arrancó.
-        En los dos el riesgo es el mismo y es el peor que tenemos: decirle a
-        alguien que su universidad no está cuando sí está.
+        Puede venir de tres lados: una tool que falló, el modelo que pidió
+        el traspaso porque esto no lo resuelve él, o el MCP caído desde que
+        arrancó. En los tres el riesgo es el mismo y es el peor que tenemos:
+        contestar sobre el catálogo sin haberlo mirado, o dar por cerrado
+        algo que necesita una persona.
         """
-        fallo = consulta_fallida(conversacion)
-        if fallo:
-            return (
-                f"El agente no pudo consultar el catálogo ({fallo}) al responder "
-                "este mensaje, así que puede haber contestado de menos. Lo dejo "
-                "para que lo revise una persona."
-            )
+        pedido = traspaso.tomar(conversacion)
+        if pedido:
+            return pedido
 
         if catalogo_caido():
             return (

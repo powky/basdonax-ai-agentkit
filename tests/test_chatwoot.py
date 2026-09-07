@@ -448,8 +448,13 @@ def test_su_propia_respuesta_no_dispara_otra():
     assert canal.envios() == []
 
 
-def test_si_el_modelo_falla_se_le_avisa_a_la_persona():
-    """Un error con una persona no puede dejarla esperando en silencio."""
+def test_si_el_modelo_falla_se_le_avisa_a_la_persona_sin_el_error_crudo():
+    """Un error no puede dejarla esperando en silencio — ni asustarla.
+
+    Un "RateLimitError: quota exceeded" no le dice nada a un estudiante y nos
+    hace ver rotos. La persona recibe una línea humana; el error de verdad va
+    a la nota privada, que es donde le sirve a alguien.
+    """
     from test_agente import agente_falso
 
     canal = ChatwootFalso()
@@ -458,8 +463,20 @@ def test_si_el_modelo_falla_se_le_avisa_a_la_persona():
     with cliente(canal, agente) as web:
         web.post("/chatwoot/secreto", json=evento("hola"))
 
-    assert len(canal.envios()) == 1
-    assert "rompió" in canal.envios()[0]
+    publicos = [
+        l["datos"]["content"]
+        for l in canal.llamadas
+        if l["camino"].endswith("/messages") and l["datos"] and not l["datos"].get("private")
+    ]
+    assert len(publicos) == 1
+    assert "Error" not in publicos[0], "el error crudo no sale al cliente"
+
+    notas = [
+        l["datos"]["content"]
+        for l in canal.llamadas
+        if l["camino"].endswith("/messages") and l["datos"] and l["datos"].get("private")
+    ]
+    assert notas and "no pudo generar la respuesta" in notas[0]
 
 
 def test_el_salud_contesta():

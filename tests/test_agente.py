@@ -208,6 +208,32 @@ def test_el_prompt_sale_del_archivo():
     assert entrada[0].content == leer_prompt(a.config.prompt_sistema)
 
 
+def test_la_guia_de_la_app_se_pega_abajo_del_prompt(tmp_path):
+    """La guía va aparte: cambia cuando cambia la app, no la personalidad."""
+    guia = tmp_path / "guia-app.md"
+    guia.write_text("# Cómo se usa la app\n\nPaso 1: abrir la app.", encoding="utf-8")
+
+    a = agente_falso(["x"])
+    a.config.cache = False
+    a.config.prompt_guia = guia
+
+    contenido = a._armar_entrada({"messages": []})[0].content
+
+    assert contenido.startswith(leer_prompt(a.config.prompt_sistema))
+    assert "Paso 1: abrir la app." in contenido
+
+
+def test_si_falta_la_guia_el_agente_contesta_igual(tmp_path):
+    """Sin manual guía peor, pero atender WhatsApp no se detiene por eso."""
+    a = agente_falso(["x"])
+    a.config.cache = False
+    a.config.prompt_guia = tmp_path / "no-existe.md"
+
+    contenido = a._armar_entrada({"messages": []})[0].content
+
+    assert contenido == leer_prompt(a.config.prompt_sistema)
+
+
 def test_con_cache_el_prompt_va_marcado_para_claude():
     a = agente_falso(["x"])
     a.config.cache = True

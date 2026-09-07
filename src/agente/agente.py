@@ -196,6 +196,17 @@ class Agente:
         """
         texto = leer_prompt(self.config.prompt_sistema)
 
+        # La guía de la app se pega abajo. Si el archivo no está, el agente
+        # sigue andando: contesta igual, solo que sin poder guiar paso a paso.
+        guia = self.config.prompt_guia
+        if guia is not None:
+            try:
+                manual = guia.read_text(encoding="utf-8").strip()
+            except OSError:
+                manual = ""
+            if manual:
+                texto = f"{texto}\n\n{manual}"
+
         if self.config.cache and self.config.proveedor == "claude":
             return SystemMessage(
                 content=[

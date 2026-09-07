@@ -46,6 +46,7 @@ class Config:
     max_tokens: int
     memoria_mensajes: int
     prompt_sistema: Path
+    prompt_guia: Path | None = None
     modo: str = "test"
     cache: bool = True
     sqlite_ruta: str = "datos/conversaciones.db"
@@ -125,6 +126,10 @@ class Config:
             max_tokens=_entero("MAX_TOKENS", 4096),
             memoria_mensajes=_entero("MEMORIA_MENSAJES", 20),
             prompt_sistema=RAIZ / os.getenv("PROMPT_SISTEMA", "prompts/sistema.md"),
+            # La guía de la app va aparte del prompt: cambia cuando cambia la
+            # app, no cuando cambia la personalidad del agente, y son dos
+            # cosas que edita gente distinta en momentos distintos.
+            prompt_guia=RAIZ / os.getenv("PROMPT_GUIA", "prompts/guia-app.md"),
             modo=modo,
             cache=_booleano("CACHE", True),
             sqlite_ruta=os.getenv("SQLITE_RUTA", "datos/conversaciones.db"),

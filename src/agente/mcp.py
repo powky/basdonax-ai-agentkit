@@ -27,6 +27,7 @@ import logging
 import threading
 from typing import Any
 
+from . import traspaso
 from .contexto import canal_actual, conversacion_actual
 
 registro = logging.getLogger("agente.mcp")
@@ -44,29 +45,10 @@ _candado = threading.Lock()
 # MCP": si nadie lo configuró, el agente no tiene por qué avisar nada.
 _caido = False
 
-# En qué conversaciones falló una consulta, y cuál. Se anota acá y no en un
-# contextvar porque quien lo escribe corre en otro hilo (asyncio.to_thread
-# copia el contexto, así que lo que se cambia adentro no vuelve).
-_fallidas: dict[str, str] = {}
-
 
 def catalogo_caido() -> bool:
     """Si el catálogo está configurado pero hoy no se puede consultar."""
     return _caido
-
-
-def anotar_consulta_fallida(conversacion: str, detalle: str) -> None:
-    if conversacion:
-        _fallidas[conversacion] = detalle
-
-
-def consulta_fallida(conversacion: str) -> str:
-    """Qué consulta falló en esa conversación. Se lee una sola vez.
-
-    Se consume a propósito: el aviso es por respuesta, no por conversación.
-    Si quedara pegado, cada mensaje siguiente volvería a avisar lo mismo.
-    """
-    return _fallidas.pop(conversacion, "")
 
 
 def _loop_de_fondo() -> asyncio.AbstractEventLoop:
@@ -167,7 +149,12 @@ def _envolver(tool):
             # conversación a una persona en vez de dejar una respuesta a
             # medias como si nada hubiera pasado.
             registro.error("La tool %s falló: %s", tool.name, e)
-            anotar_consulta_fallida(conversacion_actual.get(), tool.name)
+            traspaso.pedir(
+                conversacion_actual.get(),
+                f"El agente no pudo consultar el catálogo ({tool.name}) al responder "
+                "este mensaje, así que puede haber contestado de menos. Lo dejo para "
+                "que lo revise una persona.",
+            )
             return (
                 "No se pudo consultar el catálogo de Studiante en este momento. "
                 "No inventes la respuesta ni afirmes que algo no está: decile a "

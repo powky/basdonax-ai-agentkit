@@ -41,10 +41,12 @@ Lo que importa acá es qué hace cada uno:
 | `herramientas.py` | Tools locales. Hoy ninguna: el clima quedó como ejemplo, sin registrar. |
 | `mcp.py` | **Las tools de verdad**: el catálogo y el buzón de pedidos, vía el MCP acotado |
 | `contexto.py` | De qué conversación y canal es el mensaje que se atiende (para las tools) |
+| `traspaso.py` | Qué conversaciones hay que dejarle a una persona, y por qué |
 | `canales/ficha.py` | Lee la ficha que manda la app (versión, equipo, universidad) |
 | `modelos.py` | Crea el modelo y le pregunta al proveedor cuáles tiene |
 | `memoria.py` | Los checkpointers: `ram` / `sqlite` / `postgres` |
 | `prompts.py` | Lee y guarda `prompts/sistema.md` |
+| `../prompts/guia-app.md` | El manual de la app, que se pega abajo del prompt |
 | `respuesta.py` | Parte una respuesta larga en varios mensajes |
 | `consola.py` | Que la terminal de Windows no rompa con las tildes |
 | `config.py` | Lee el `.env`. Única fuente de configuración. |
