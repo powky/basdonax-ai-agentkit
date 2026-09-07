@@ -131,6 +131,16 @@ def crear_app(
     async def responder(conversacion: str, texto: str) -> None:
         """Le pasa la ráfaga al agente y manda la respuesta por Chatwoot."""
         async with candados[conversacion]:
+            # El interruptor se mira de nuevo ACÁ, no solo al recibir el
+            # mensaje. Entre una cosa y la otra pasó el buffer —hoy
+            # BUFFER_SEGUNDOS=60— y ese rato es justo cuando alguien del
+            # equipo entra a la bandeja y toma la conversación. Mirarlo solo
+            # a la entrada deja al bot soltando una última respuesta arriba
+            # de la persona, con la etiqueta ya puesta.
+            if await asyncio.to_thread(canal.la_atiende_una_persona, conversacion):
+                registro.info("[%s] la tomó una persona: no contesto", conversacion)
+                return
+
             registro.info("[%s] %s", conversacion, texto.replace("\n", " | ")[:200])
 
             # Por dónde entró: lo usan las tools del MCP para anotar de qué
@@ -154,6 +164,18 @@ def crear_app(
                 aviso = f"{type(e).__name__}: {e}"
                 registro.error("[%s] %s", conversacion, aviso)
                 mensajes = [f"Se me rompió algo: {aviso}"]
+
+            # Segunda mirada, y no es de más: pensar la respuesta puede
+            # llevarse veinte segundos cuando el modelo consulta el catálogo.
+            # Lo que no se puede permitir no es pensarla, es mandarla encima
+            # de quien ya está atendiendo.
+            if await asyncio.to_thread(canal.la_atiende_una_persona, conversacion):
+                registro.info(
+                    "[%s] la tomaron mientras pensaba: no mando la respuesta",
+                    conversacion,
+                )
+                await asyncio.to_thread(canal.escribiendo, conversacion, False)
+                return
 
             try:
                 await asyncio.to_thread(canal.enviar, conversacion, mensajes)

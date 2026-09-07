@@ -61,3 +61,18 @@ class Canal(ABC):
         Por defecto contesta todo. Cada canal lo ajusta.
         """
         return True
+
+    def la_atiende_una_persona(self, conversacion: str) -> bool:
+        """Si alguien del equipo tomó esa conversación.
+
+        Va aparte de `deberia_responder` porque se pregunta en otro momento:
+        aquella mira el mensaje que ACABA de llegar, y esta mira la
+        conversación por su id, cuando el mensaje ya no está a mano. Hace
+        falta porque entre que llega un mensaje y sale la respuesta pasa el
+        buffer, y en ese rato es cuando alguien entra a la bandeja y toma la
+        conversación.
+
+        Por defecto no hay traspaso: un canal sin bandeja, como la consola,
+        no tiene a quién traspasarle nada.
+        """
+        return False

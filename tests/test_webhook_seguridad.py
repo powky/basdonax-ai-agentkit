@@ -36,6 +36,7 @@ class CanalFalso:
         self.canal = canal
         self.enviados = []
         self.clasificados = []
+        self.tomada = False  # si alguien del equipo puso la etiqueta
 
     def traducir(self, evento):
         from agente.canales.base import MensajeEntrante
@@ -70,8 +71,11 @@ class CanalFalso:
     def guardar_nombre(self, conversacion, nombre):
         return "ok"
 
+    def la_atiende_una_persona(self, conversacion):
+        return self.tomada
 
-def armar(canales=(), secreto="", canal="whatsapp"):
+
+def armar(canales=(), secreto="", canal="whatsapp", hacer_agente=None):
     config = Config(
         proveedor="claude",
         modelo="modelo-de-prueba",
@@ -87,7 +91,8 @@ def armar(canales=(), secreto="", canal="whatsapp"):
         buffer_segundos=0,  # sin espera: el test no puede tardar un minuto
     )
     canal_falso = CanalFalso(canal)
-    app = crear_app(config, agente=AgenteFalso(), canal=canal_falso)
+    agente = hacer_agente(canal_falso) if hacer_agente else AgenteFalso()
+    app = crear_app(config, agente=agente, canal=canal_falso)
     return TestClient(app), canal_falso
 
 
@@ -199,6 +204,56 @@ def test_la_ficha_se_guarda_aunque_el_agente_no_conteste():
     cliente, canal = armar(canales=("whatsapp",), canal="email")
     cliente.post(f"/chatwoot/{TOKEN}", json=evento())
     assert canal.clasificados == ["42"]
+
+
+# -- El traspaso a una persona -----------------------------------------------
+
+
+def test_no_contesta_si_la_tomaron_mientras_esperaba_la_rafaga():
+    """La ventana que se nos escapó en producción.
+
+    El mensaje entra sin etiqueta, así que `deberia_responder` dice que sí.
+    Pero la respuesta sale BUFFER_SEGUNDOS después, y en ese rato alguien del
+    equipo tomó la conversación. Sin este chequeo el bot suelta una última
+    respuesta arriba de la persona, con la etiqueta ya puesta.
+    """
+    cliente, canal = armar()
+    canal.tomada = True
+
+    r = cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert r.json()["estado"] == "recibido", "entró: el filtro no es de la puerta"
+    assert canal.enviados == [], "pero no contestó"
+
+
+def test_no_manda_la_respuesta_si_la_tomaron_mientras_pensaba():
+    """Pensar puede llevarse veinte segundos si consulta el catálogo.
+
+    Lo que no se puede permitir no es pensar la respuesta: es mandarla.
+    """
+
+    class AgenteQueTarda:
+        def __init__(self, canal):
+            self.canal = canal
+
+        def responder_partido(self, texto, conversacion):
+            self.canal.tomada = True  # etiquetan justo mientras piensa
+            return ["esto ya no corresponde mandarlo"]
+
+    cliente, canal = armar(hacer_agente=AgenteQueTarda)
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert canal.enviados == []
+
+
+def test_si_nadie_la_tomo_contesta_normal():
+    """El otro lado del filtro: que no se calle cuando no debe."""
+    cliente, canal = armar()
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento("hola"))
+
+    assert canal.enviados == [("42", ["eco: hola"])]
 
 
 def test_firma_valida_rechaza_basura():

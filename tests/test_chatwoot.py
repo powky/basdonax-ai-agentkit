@@ -178,6 +178,20 @@ def test_si_el_evento_no_trae_etiquetas_se_las_pregunta():
     assert any(l["camino"].endswith("/labels") for l in canal.llamadas)
 
 
+def test_pregunta_la_etiqueta_por_id_cuando_ya_no_hay_evento():
+    """Después del buffer el evento quedó atrás: solo está el id."""
+    canal = ChatwootFalso(etiquetas_remotas=["humano"])
+
+    assert canal.la_atiende_una_persona("33") is True
+    assert any(l["camino"] == "conversations/33/labels" for l in canal.llamadas)
+
+
+def test_por_id_las_otras_etiquetas_no_lo_apagan():
+    canal = ChatwootFalso(etiquetas_remotas=["ventas", "urgente"])
+
+    assert canal.la_atiende_una_persona("33") is False
+
+
 def test_un_mensaje_normal_se_contesta():
     canal = ChatwootFalso()
     assert canal.deberia_responder(canal.traducir(evento())) is True

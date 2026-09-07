@@ -148,8 +148,23 @@ class Chatwoot(Canal):
 
         return True
 
+    def la_atiende_una_persona(self, conversacion: str) -> bool:
+        """Si esa conversación ya la tomó alguien del equipo.
+
+        Pregunta por id, sin evento de por medio, porque se llama cuando el
+        mensaje que la disparó ya pasó: después del buffer, justo antes de
+        pensar la respuesta y otra vez antes de mandarla. Entre que la
+        persona escribe y el bot contesta pasan los segundos de
+        BUFFER_SEGUNDOS más lo que tarde el modelo, y ese rato es
+        exactamente cuando alguien entra a la bandeja y pone la etiqueta.
+        """
+        if not self.etiqueta_humano:
+            return False
+
+        return self._tiene_la_etiqueta(self._etiquetas_de(conversacion))
+
     def _la_atiende_una_persona(self, evento: dict) -> bool:
-        """Si la conversación está marcada con la etiqueta de traspaso."""
+        """Lo mismo, pero mirando primero lo que ya venía en el evento."""
         if not self.etiqueta_humano:
             return False
 
@@ -163,6 +178,10 @@ class Chatwoot(Canal):
         if etiquetas is None:
             etiquetas = self._etiquetas_de(conversacion.get("id"))
 
+        return self._tiene_la_etiqueta(etiquetas)
+
+    def _tiene_la_etiqueta(self, etiquetas) -> bool:
+        """La comparación, en un solo lugar: sin mayúsculas y sin espacios."""
         return self.etiqueta_humano in {
             str(e).strip().lower() for e in etiquetas or []
         }
