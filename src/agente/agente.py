@@ -101,7 +101,12 @@ class Transmision:
 
 
 class Agente:
-    def __init__(self, config: Config | None = None, checkpointer=None) -> None:
+    def __init__(
+        self,
+        config: Config | None = None,
+        checkpointer=None,
+        herramientas_extra: list | None = None,
+    ) -> None:
         self.config = config or Config.desde_entorno()
 
         self.modelo = crear_modelo(
@@ -119,8 +124,10 @@ class Agente:
         # configurado. Se resuelven UNA vez, al armar el agente, y no por
         # mensaje — reconectar el MCP en cada pregunta sería pagar el saludo
         # completo para leer una lista de universidades.
-        self.herramientas = list(HERRAMIENTAS) + cargar_herramientas(
-            self.config.mcp_url, self.config.mcp_token
+        self.herramientas = (
+            list(HERRAMIENTAS)
+            + list(herramientas_extra or [])
+            + cargar_herramientas(self.config.mcp_url, self.config.mcp_token)
         )
 
         self.grafo = self._construir_grafo()

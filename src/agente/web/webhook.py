@@ -37,8 +37,10 @@ from fastapi.responses import JSONResponse
 
 from ..agente import Agente
 from ..canales.buffer import BufferDeMensajes
+from langchain_core.tools import StructuredTool
+
 from ..canales.chatwoot import Chatwoot
-from ..contexto import canal_actual
+from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
 
 registro = logging.getLogger("agente.webhook")
@@ -63,10 +65,27 @@ def crear_app(
         etiqueta_humano=config.chatwoot_etiqueta_humano,
     )
 
+    def guardar_nombre(nombre: str) -> str:
+        """Guarda el nombre de la persona en el contacto de Chatwoot."""
+        return canal.guardar_nombre(conversacion_actual.get(), nombre)
+
+    # La única tool que depende del canal: el resto vive en el MCP. La
+    # conversación no la pasa el modelo —no la conoce— sino el contextvar que
+    # deja puesto `responder` unas líneas más abajo.
+    herramienta_nombre = StructuredTool.from_function(
+        func=guardar_nombre,
+        name="guardar_nombre",
+        description=(
+            "Guarda el nombre de la persona con la que estás hablando, para que "
+            "el equipo la vea por su nombre y no por su número. Úsala apenas te "
+            "lo diga, una sola vez por conversación."
+        ),
+    )
+
     # El agente se arma una sola vez y atiende a todo el mundo. Es lo que
     # queremos: adentro tiene la conexión a Postgres, y armarlo por mensaje
     # sería abrir una conexión nueva cada vez.
-    agente = agente or Agente(config)
+    agente = agente or Agente(config, herramientas_extra=[herramienta_nombre])
 
     # Un candado por conversación. Dos personas distintas se atienden a la
     # vez sin problema, pero dos mensajes de la MISMA persona no: si se

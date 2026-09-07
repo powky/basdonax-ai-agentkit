@@ -185,6 +185,48 @@ class Chatwoot(Canal):
 
         return respuesta.get("payload") or []
 
+    def guardar_nombre(self, conversacion: str, nombre: str) -> str:
+        """Le pone nombre al contacto de esa conversación.
+
+        Existe porque la app no manda el nombre: manda el correo y los datos
+        del equipo. El nombre lo sabe la persona, así que el agente lo pregunta
+        y lo guarda acá — y a partir de ahí la bandeja deja de ser una lista de
+        números de teléfono.
+
+        Devuelve un texto para el modelo, no lanza: si Chatwoot rechaza el
+        cambio, el agente tiene que poder seguir la conversación igual.
+        """
+        nombre = " ".join((nombre or "").split())[:80]
+        if not nombre:
+            return "No me pasaste un nombre."
+
+        try:
+            datos = self._api("GET", f"conversations/{conversacion}")
+            contacto = ((datos.get("meta") or {}).get("sender") or {})
+            id_contacto = contacto.get("id")
+            if not id_contacto:
+                return "No encontré el contacto de esta conversación."
+
+            self._api("PUT", f"contacts/{id_contacto}", {"name": nombre})
+            return f"Listo, el contacto quedó como {nombre}."
+        except Exception as e:
+            print(f"[chatwoot] no se pudo guardar el nombre en {conversacion}: {e}")
+            return "No pude guardarlo, pero seguí la conversación normalmente."
+
+    def nombre_de(self, conversacion: str) -> str:
+        """El nombre que ya tiene el contacto, si tiene uno de verdad.
+
+        Los canales rellenan este campo con lo que sea: en WhatsApp puede venir
+        el número, y "+18091234567" no es un nombre. Si lo que hay no tiene una
+        letra, se devuelve vacío para que el agente lo pregunte.
+        """
+        try:
+            datos = self._api("GET", f"conversations/{conversacion}")
+            nombre = (((datos.get("meta") or {}).get("sender") or {}).get("name") or "").strip()
+        except Exception:
+            return ""
+        return nombre if any(c.isalpha() for c in nombre) else ""
+
     def canal_de(self, conversacion: str) -> str:
         """Por dónde entró esa conversación: whatsapp, instagram, email, web."""
         return self._canales.get(str(conversacion), "")
