@@ -380,6 +380,13 @@ class Chatwoot(Canal):
                 "Content-Type": "application/json",
                 # Así se autentica Chatwoot: no es un Bearer, es este header.
                 "api_access_token": self.token,
+                # Sin esto salimos como "Python-urllib/3.x", y cualquier
+                # Cloudflare delante de Chatwoot lo trata como bot y contesta
+                # 403 con el código 1010. El síntoma es de los que cuestan:
+                # el agente recibe el mensaje, lo piensa, gasta los tokens del
+                # modelo, y la respuesta muere al salir.
+                "User-Agent": "Studiante-Agente/1.0 (+https://studiante.app)",
+                "Accept": "application/json",
             },
         )
 
