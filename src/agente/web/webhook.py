@@ -28,7 +28,11 @@ largo y por eso no va en el código.
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
+import json
 import logging
+import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
 
@@ -44,6 +48,37 @@ from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
 
 registro = logging.getLogger("agente.webhook")
+
+
+# Cuánto se acepta de desfase entre el reloj de Chatwoot y el nuestro. Sin este
+# tope, un pedido firmado interceptado hoy sirve para siempre.
+TOLERANCIA_FIRMA = 300
+
+
+def firma_valida(secreto: str, cuerpo: bytes, firma: str, marca: str) -> bool:
+    """Comprueba la firma que manda Chatwoot con cada webhook.
+
+    Chatwoot arma `sha256=HMAC_SHA256(secreto, "<timestamp>.<cuerpo>")` y lo
+    manda en `X-Chatwoot-Signature`, con el timestamp aparte. Verificarlo es
+    mejor que confiar en el token de la URL: aquel prueba que quien llama
+    conoce la dirección, este prueba que el CUERPO salió de tu Chatwoot y que
+    nadie lo tocó por el camino.
+    """
+    if not firma or not marca:
+        return False
+
+    # El timestamp entra en el HMAC, así que un pedido viejo no se puede
+    # reenviar: la firma solo vale para su momento.
+    try:
+        if abs(time.time() - int(marca)) > TOLERANCIA_FIRMA:
+            return False
+    except ValueError:
+        return False
+
+    esperada = hmac.new(
+        secreto.encode(), f"{marca}.".encode() + cuerpo, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={esperada}", firma)
 
 
 def crear_app(
@@ -150,11 +185,13 @@ def crear_app(
     @asynccontextmanager
     async def ciclo_de_vida(app: FastAPI):
         registro.info(
-            "Agente escuchando - %s / %s - memoria %s - buffer %ss",
+            "Agente escuchando - %s / %s - memoria %s - buffer %ss - canales %s - firma %s",
             config.proveedor,
             config.modelo,
             "Postgres" if config.modo == "produccion" else "SQLite",
             config.buffer_segundos,
+            ", ".join(config.canales) if config.canales else "todos",
+            "sí" if config.chatwoot_webhook_secret else "NO (sin CHATWOOT_WEBHOOK_SECRET)",
         )
         yield
         # Al apagar, soltamos lo que estaba esperando. Sin esto, un deploy
@@ -188,8 +225,23 @@ def crear_app(
             registro.warning("Llamada con token equivocado")
             return JSONResponse({"error": "no autorizado"}, status_code=401)
 
+        # El cuerpo crudo, no el parseado: la firma se calcula sobre los bytes
+        # exactos que mandó Chatwoot, y volver a serializar el JSON cambia
+        # espacios y orden.
+        crudo = await pedido.body()
+
+        if config.chatwoot_webhook_secret:
+            if not firma_valida(
+                config.chatwoot_webhook_secret,
+                crudo,
+                pedido.headers.get("x-chatwoot-signature", ""),
+                pedido.headers.get("x-chatwoot-timestamp", ""),
+            ):
+                registro.warning("Pedido con firma inválida")
+                return JSONResponse({"error": "no autorizado"}, status_code=401)
+
         try:
-            evento = await pedido.json()
+            evento = json.loads(crudo)
         except Exception:
             return JSONResponse({"error": "esperaba JSON"}, status_code=400)
 
@@ -207,6 +259,20 @@ def crear_app(
             # No es un error: es la mayoría de lo que llega. Cada respuesta
             # que manda el propio agente vuelve como un evento más.
             return JSONResponse({"estado": "ignorado"})
+
+        # En qué canales contesta. El webhook de Chatwoot es de cuenta, no de
+        # bandeja: llega TODO, así que el filtro va acá. La ficha se guarda
+        # igual unas líneas más arriba, porque a quien atienda a mano esos
+        # datos le sirven venga de donde venga.
+        if config.canales:
+            canal_entrante = canal.canal_de(entrante.conversacion)
+            if canal_entrante and canal_entrante not in config.canales:
+                registro.info(
+                    "[%s] de %s: fuera de los canales que atiende el agente",
+                    entrante.conversacion,
+                    canal_entrante,
+                )
+                return JSONResponse({"estado": "ignorado"})
 
         # Se suma a la ráfaga y contestamos ya. Lo que sigue pasa solo.
         await buffer.agregar(entrante.conversacion, entrante.texto)

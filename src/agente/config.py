@@ -71,6 +71,13 @@ class Config:
     # el agente arranca igual, solo que sin esas tools (la web y los tests).
     mcp_url: str = ""
     mcp_token: str = ""
+    # El secreto que Chatwoot genera al crear el webhook. Con él, cada pedido
+    # viene firmado y se puede comprobar que salió de TU Chatwoot y no de
+    # alguien que descubrió la URL. Vacío = no se verifica (y se avisa).
+    chatwoot_webhook_secret: str = ""
+    # En qué canales contesta. Vacío = en todos. "whatsapp,instagram" deja el
+    # correo y el widget para las personas.
+    canales: tuple[str, ...] = ()
 
 
     @classmethod
@@ -135,6 +142,12 @@ class Config:
             buffer_segundos=_entero("BUFFER_SEGUNDOS", 8),
             mcp_url=(os.getenv("MCP_URL") or "").strip(),
             mcp_token=(os.getenv("MCP_TOKEN") or "").strip(),
+            chatwoot_webhook_secret=(os.getenv("CHATWOOT_WEBHOOK_SECRET") or "").strip(),
+            canales=tuple(
+                c.strip().lower()
+                for c in (os.getenv("CANALES") or "").split(",")
+                if c.strip()
+            ),
         )
 
 
