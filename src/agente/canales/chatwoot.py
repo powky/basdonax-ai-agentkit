@@ -290,6 +290,47 @@ class Chatwoot(Canal):
 
         return ficha
 
+    # Los atributos que la ficha escribe, con el nombre que se ve en la
+    # bandeja. Ver ficha.atributos(): las claves tienen que coincidir.
+    ATRIBUTOS = {
+        "app_version": "Versión de la app",
+        "sistema": "Sistema",
+        "dispositivo": "Dispositivo",
+        "universidad": "Universidad",
+        "carrera": "Carrera",
+        "plan": "Plan",
+    }
+
+    def asegurar_atributos(self) -> None:
+        """Crea en Chatwoot las definiciones de los atributos que escribimos.
+
+        Sin esto el panel del contacto sale VACÍO aunque los datos estén
+        guardados: Chatwoot solo pinta los atributos que alguien definió antes
+        en sus ajustes, y la API acepta los valores igual. O sea que el fallo
+        no da error en ningún lado — simplemente no se ve nada, que es la peor
+        forma de fallar.
+
+        Es idempotente: los que ya existen devuelven conflicto y se ignoran.
+        Y es best-effort: si Chatwoot no contesta, el agente atiende igual.
+        """
+        for clave, nombre in self.ATRIBUTOS.items():
+            try:
+                self._api(
+                    "POST",
+                    "custom_attribute_definitions",
+                    {
+                        "attribute_display_name": nombre,
+                        "attribute_key": clave,
+                        "attribute_display_type": "text",
+                        "attribute_model": "contact_attribute",
+                        "attribute_description": "Lo manda la app en el mensaje de soporte.",
+                    },
+                )
+            except Exception:
+                # Ya existía, o Chatwoot está de mal humor. Ninguna de las dos
+                # cosas justifica no atender a nadie.
+                pass
+
     def _actualizar_contacto(self, id_contacto, ficha: Ficha, actual: dict) -> None:
         """Escribe correo y atributos en el contacto, sin pisar lo que ya hay."""
         cambios: dict = {}

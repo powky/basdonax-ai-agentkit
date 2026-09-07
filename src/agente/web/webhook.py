@@ -274,6 +274,11 @@ def crear_app(
 
     @asynccontextmanager
     async def ciclo_de_vida(app: FastAPI):
+        # Que los datos del equipo se VEAN en la bandeja. Chatwoot solo pinta
+        # los atributos que están definidos, y sin esto el panel queda vacío
+        # aunque los datos se hayan guardado bien.
+        if hasattr(canal, "asegurar_atributos"):
+            await asyncio.to_thread(canal.asegurar_atributos)
         registro.info(
             "Agente escuchando - %s / %s - memoria %s - buffer %ss - canales %s - firma %s",
             config.proveedor,
