@@ -33,6 +33,11 @@ class MensajeEntrante:
     texto: str
     conversacion: str          # el thread_id: quién habla
     identificador: str = ""    # el id del mensaje en el canal, para no repetirlo
+    # Qué archivos venían, descritos en una línea cada uno ("PDF plan.pdf").
+    # Vacío en la enorme mayoría de los mensajes. Quien lo mira no es el
+    # agente —no sabe abrirlos— sino el webhook, para pasar la conversación a
+    # una persona: un archivo es justo lo que solo un humano puede leer.
+    adjuntos: list[str] = field(default_factory=list)
     datos: dict = field(default_factory=dict)  # lo crudo, por si el canal lo necesita
 
 

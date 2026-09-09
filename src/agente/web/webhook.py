@@ -369,6 +369,23 @@ def crear_app(
                 )
                 return JSONResponse({"estado": "ignorado"})
 
+        # Un archivo lo pasa a una persona, siempre y sin preguntarle al
+        # modelo. El agente no sabe abrirlos: no puede leer el PDF de un plan
+        # de estudios ni la captura de un error. Dejarlo a su criterio es
+        # dejarlo al azar, y el caso que nos importa —alguien mandando el
+        # pensum que no encontró— es justo el que no se puede perder.
+        #
+        # Va acá y no adentro de la respuesta porque el traspaso se consume
+        # después de enviar: el agente igual acusa recibo, y recién ahí la
+        # conversación cambia de manos.
+        if entrante.adjuntos:
+            traspaso.pedir(
+                entrante.conversacion,
+                "Mandó archivos que el agente no puede leer ("
+                + ", ".join(entrante.adjuntos)
+                + "). Hay que abrirlos a mano.",
+            )
+
         # Se suma a la ráfaga y contestamos ya. Lo que sigue pasa solo.
         await buffer.agregar(entrante.conversacion, entrante.texto)
 

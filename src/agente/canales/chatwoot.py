@@ -33,6 +33,7 @@ import json
 import urllib.error
 import urllib.request
 from collections import deque
+from urllib.parse import unquote
 
 from .base import Canal, MensajeEntrante
 from .ficha import Ficha, leer_ficha
@@ -87,8 +88,13 @@ class Chatwoot(Canal):
         """Convierte un evento del webhook en algo que el agente entiende.
 
         Devuelve None si el evento no es un mensaje que tengamos que mirar:
-        otro tipo de evento, o un mensaje sin texto (un audio, una foto, un
-        adjunto suelto) que el agente todavía no sabe leer.
+        otro tipo de evento, o un mensaje sin texto NI adjuntos.
+
+        Un adjunto no se ignora aunque el agente no sepa abrirlo. Antes sí, y
+        el resultado era el peor de todos: alguien mandaba el PDF de su pensum
+        y del otro lado no pasaba nada — ni respuesta ni traspaso. Ahora entra
+        anunciado, el agente acusa recibo y la conversación pasa a una persona,
+        que es la única que puede leerlo.
         """
         if evento.get("event") != "message_created":
             return None
@@ -96,14 +102,23 @@ class Chatwoot(Canal):
         conversacion = evento.get("conversation") or {}
         id_conversacion = conversacion.get("id")
         texto = (evento.get("content") or "").strip()
+        adjuntos = _adjuntos_de(evento)
 
-        if not id_conversacion or not texto:
+        if not id_conversacion or (not texto and not adjuntos):
             return None
+
+        # El aviso va DENTRO del texto porque es lo único que el agente lee.
+        # Entre corchetes y en tercera persona para que no lo confunda con
+        # algo que escribió la persona.
+        if adjuntos:
+            aviso = "[adjunto recibido: " + ", ".join(adjuntos) + "]"
+            texto = f"{texto}\n{aviso}" if texto else aviso
 
         self._canales[str(id_conversacion)] = _canal_de(evento)
 
         return MensajeEntrante(
             texto=texto,
+            adjuntos=adjuntos,
             # El id de conversación es el thread_id: la memoria de cada
             # persona por separado.
             conversacion=str(id_conversacion),
@@ -489,6 +504,31 @@ class Chatwoot(Canal):
 
 
 # -- Ayudantes ----------------------------------------------------------------
+
+
+def _adjuntos_de(evento: dict) -> list[str]:
+    """Los archivos que venían en el mensaje, uno por línea de texto.
+
+    Chatwoot los manda en `attachments`, cada uno con su `file_type` ("file",
+    "image", "audio"…) y su `data_url`. No los descargamos: acá alcanza con
+    saber QUÉ llegó para anunciarlo y pasar la conversación a una persona.
+
+    El nombre sale de la URL porque Chatwoot no manda uno aparte. Si no se
+    puede sacar, queda el tipo solo — "image" dice bastante más que nada.
+    """
+    crudos = evento.get("attachments")
+    if not isinstance(crudos, list):
+        return []
+
+    salida: list[str] = []
+    for a in crudos:
+        if not isinstance(a, dict):
+            continue
+        tipo = str(a.get("file_type") or "archivo").strip()
+        url = str(a.get("data_url") or "")
+        nombre = unquote(url.rsplit("/", 1)[-1].split("?")[0]) if url else ""
+        salida.append(f"{tipo} {nombre}".strip() if nombre else tipo)
+    return salida
 
 
 def _canal_de(evento: dict) -> str:

@@ -42,12 +42,17 @@ class CanalFalso:
     def traducir(self, evento):
         from agente.canales.base import MensajeEntrante
 
+        # Los adjuntos se leen con el parser DE VERDAD: es lo que decide el
+        # traspaso, y un doble que no los viera dejaría ese camino sin probar.
+        from agente.canales.chatwoot import _adjuntos_de
+
         if evento.get("event") != "message_created":
             return None
         return MensajeEntrante(
             texto=evento.get("content", ""),
             conversacion=str((evento.get("conversation") or {}).get("id", "1")),
             identificador=str(evento.get("id", "")),
+            adjuntos=_adjuntos_de(evento),
             datos=evento,
         )
 
@@ -100,13 +105,14 @@ def armar(canales=(), secreto="", canal="whatsapp", hacer_agente=None):
     return TestClient(app), canal_falso
 
 
-def evento(texto="hola"):
+def evento(texto="hola", adjuntos=None):
     return {
         "event": "message_created",
         "id": 7,
         "content": texto,
         "message_type": "incoming",
         "conversation": {"id": 42},
+        "attachments": [] if adjuntos is None else adjuntos,
     }
 
 
@@ -294,6 +300,43 @@ def test_con_el_catalogo_caido_tambien_la_pasa(monkeypatch):
 
     assert len(canal.traspasos) == 1
     assert "catálogo" in canal.traspasos[0][1]
+
+
+def test_un_archivo_la_pasa_a_una_persona(monkeypatch):
+    """El agente no sabe abrir un PDF, así que no puede quedarse él con esto.
+
+    Es el caso de "no encuentro mi pensum, aquí está el archivo": el modelo
+    acusa recibo, pero quien lo monta es una persona. No se le pregunta al
+    modelo si le parece — un archivo pasa siempre.
+    """
+    from agente.web import webhook as modulo
+
+    monkeypatch.setattr(modulo, "catalogo_caido", lambda: False)
+    cliente, canal = armar()
+
+    cliente.post(
+        f"/chatwoot/{TOKEN}",
+        json=evento(
+            texto="",
+            adjuntos=[{"file_type": "file", "data_url": "https://x/y/pensum.pdf"}],
+        ),
+    )
+
+    assert canal.enviados, "primero contesta"
+    assert len(canal.traspasos) == 1
+    assert "pensum.pdf" in canal.traspasos[0][1]
+
+
+def test_sin_archivo_no_pasa_nada(monkeypatch):
+    """El otro lado: un mensaje normal no llena la bandeja."""
+    from agente.web import webhook as modulo
+
+    monkeypatch.setattr(modulo, "catalogo_caido", lambda: False)
+    cliente, canal = armar()
+
+    cliente.post(f"/chatwoot/{TOKEN}", json=evento())
+
+    assert canal.traspasos == []
 
 
 def test_si_el_catalogo_anduvo_no_molesta_a_nadie(monkeypatch):

@@ -34,6 +34,7 @@ def evento(
     privado=False,
     etiquetas=None,
     nombre="message_created",
+    adjuntos=None,
 ) -> dict:
     """Un mensaje como lo manda el webhook de Chatwoot."""
     return {
@@ -49,6 +50,7 @@ def evento(
         },
         "account": {"id": 1},
         "inbox": {"id": 6, "name": "YT"},
+        "attachments": [] if adjuntos is None else adjuntos,
     }
 
 
@@ -108,10 +110,49 @@ def test_los_otros_eventos_se_dejan_pasar(nombre):
     assert ChatwootFalso().traducir(evento(nombre=nombre)) is None
 
 
-def test_un_mensaje_sin_texto_se_deja_pasar():
-    """Un audio o una foto sueltos: el agente todavía no sabe leer eso."""
+def test_un_mensaje_sin_texto_ni_adjuntos_se_deja_pasar():
+    """Un evento vacío no es nada que atender."""
     assert ChatwootFalso().traducir(evento(texto="")) is None
     assert ChatwootFalso().traducir(evento(texto="   ")) is None
+
+
+# -- Adjuntos ------------------------------------------------------------------
+#
+# El caso que los trajo: alguien manda el PDF del pensum que no encontró. Antes
+# el mensaje se descartaba por no traer texto y del otro lado no pasaba NADA —
+# ni respuesta ni traspaso. Lo peor que puede hacer un bot de soporte.
+
+
+def _pdf(nombre="plan%20de%20estudios.pdf"):
+    return {
+        "file_type": "file",
+        "data_url": f"https://chatwoot.ejemplo.com/rails/active_storage/x/{nombre}?v=1",
+    }
+
+
+def test_un_archivo_solo_ya_no_se_descarta():
+    m = ChatwootFalso().traducir(evento(texto="", adjuntos=[_pdf()]))
+    assert m is not None
+    assert m.adjuntos == ["file plan de estudios.pdf"]
+    # El agente solo lee el texto: si el aviso no va ahí, para él no llegó nada.
+    assert m.texto == "[adjunto recibido: file plan de estudios.pdf]"
+
+
+def test_el_archivo_con_texto_no_le_pisa_lo_que_escribio():
+    m = ChatwootFalso().traducir(evento(texto="aquí está", adjuntos=[_pdf()]))
+    assert m.texto.startswith("aquí está")
+    assert "[adjunto recibido:" in m.texto
+
+
+def test_un_mensaje_normal_no_trae_adjuntos():
+    assert ChatwootFalso().traducir(evento()).adjuntos == []
+
+
+def test_el_adjunto_sin_nombre_queda_con_su_tipo():
+    m = ChatwootFalso().traducir(
+        evento(texto="", adjuntos=[{"file_type": "image", "data_url": ""}])
+    )
+    assert m.adjuntos == ["image"]
 
 
 # -- Qué se contesta y qué no -------------------------------------------------
