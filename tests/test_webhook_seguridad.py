@@ -360,3 +360,30 @@ def test_si_el_catalogo_anduvo_no_molesta_a_nadie(monkeypatch):
 def test_firma_valida_rechaza_basura():
     assert not firma_valida(SECRETO, b"{}", "", "")
     assert not firma_valida(SECRETO, b"{}", "sha256=nada", "no-es-un-numero")
+
+
+# -- El default del .env -----------------------------------------------------
+#
+# El filtro de canales lo pone una variable, y una variable se olvida. Como el
+# webhook de Chatwoot es de CUENTA, olvidarla significaba contestarle también a
+# los correos y al widget: por eso sin CANALES el agente atiende WhatsApp y
+# nada más, y "todos" hay que escribirlo.
+
+
+@pytest.mark.parametrize(
+    "valor,esperado",
+    [
+        (None, ("whatsapp",)),
+        ("", ("whatsapp",)),
+        ("  ", ("whatsapp",)),
+        ("whatsapp,instagram", ("whatsapp", "instagram")),
+        ("WhatsApp, Instagram ", ("whatsapp", "instagram")),
+        ("todos", ()),
+        ("TODOS", ()),
+        ("*", ()),
+    ],
+)
+def test_canales_del_entorno(valor, esperado):
+    from agente.config import _canales
+
+    assert _canales(valor) == esperado

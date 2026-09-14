@@ -77,7 +77,10 @@ class Config:
     # alguien que descubrió la URL. Vacío = no se verifica (y se avisa).
     chatwoot_webhook_secret: str = ""
     # En qué canales contesta. Vacío = en todos. "whatsapp,instagram" deja el
-    # correo y el widget para las personas.
+    # correo y el widget para las personas. El campo vacío sigue significando
+    # "todos" — el que acota es el .env, y sin CANALES el default es whatsapp
+    # (ver desde_entorno): el webhook de Chatwoot es de cuenta, así que un
+    # despliegue sin esa variable contestaría hasta los correos.
     canales: tuple[str, ...] = ()
 
 
@@ -148,12 +151,27 @@ class Config:
             mcp_url=(os.getenv("MCP_URL") or "").strip(),
             mcp_token=(os.getenv("MCP_TOKEN") or "").strip(),
             chatwoot_webhook_secret=(os.getenv("CHATWOOT_WEBHOOK_SECRET") or "").strip(),
-            canales=tuple(
-                c.strip().lower()
-                for c in (os.getenv("CANALES") or "").split(",")
-                if c.strip()
-            ),
+            # Sin CANALES, WhatsApp y nada más. Contestar en todos lados es
+            # una decisión que se toma a mano, no algo que salga de olvidarse
+            # de una variable: por eso "todos" se escribe, y se escribe así.
+            canales=_canales(os.getenv("CANALES")),
         )
+
+
+def _canales(crudo: str | None) -> tuple[str, ...]:
+    """Los canales del .env: lista separada por comas, "todos", o nada.
+
+    Sin la variable, WhatsApp — el webhook de Chatwoot es de cuenta y no de
+    bandeja, así que "en todos" significa contestarle también a los correos y
+    al widget de la web. Para eso está la palabra `todos`, que devuelve la
+    tupla vacía (que es lo que el filtro del webhook lee como "no filtres").
+    """
+    # El strip va ANTES del default: una variable puesta a espacios es una
+    # variable sin poner, y no "contesta en todos lados".
+    valor = (crudo or "").strip().lower() or "whatsapp"
+    if valor in {"todos", "all", "*"}:
+        return ()
+    return tuple(c.strip().lower() for c in valor.split(",") if c.strip())
 
 
 def proveedores_disponibles() -> dict[str, bool]:
