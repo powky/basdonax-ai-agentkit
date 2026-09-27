@@ -1,8 +1,8 @@
-"""La ficha que manda la app, leída de los tres formatos reales.
+"""La ficha que manda la app, leída de los formatos reales.
 
 Los textos de acá abajo NO son inventados: son los que arma la app en
-`AccountScreen.tsx`, `MissingPensumSheet.tsx` y `DeleteAccountFlow.tsx`. Si
-alguno cambia allá, estos tests son los que avisan.
+`AccountScreen.tsx`, `MissingPensumSheet.tsx`, `DeleteAccountFlow.tsx` y
+`FalloPortal.tsx`. Si alguno cambia allá, estos tests son los que avisan.
 """
 
 import sys
@@ -102,3 +102,44 @@ def test_atributos_solo_lleva_lo_que_hay():
         "carrera": "Mercadotecnia",
         "plan": "2019",
     }
+
+
+def test_lee_el_equipo_de_la_2_1_con_build_y_ota():
+    """Desde la 2.1.0 la versión trae el build y la OTA va aparte.
+
+    Antes "App v2.1.0 (11)" no casaba con la versión y quedaba guardado como
+    el modelo del teléfono, y el modelo de verdad se perdía.
+    """
+    ficha = leer_ficha(
+        "Hola 👋 Quiero reportar un problema en Studiante.\n"
+        "\n"
+        "Equipo: App v2.1.0 (11) · OTA aae41f9 · ios 18.7.10 · iPhone XR · alguien@correo.com\n"
+        "\n"
+        "Mi problema: Tengo el índice en 4.0 y ninguna estrella"
+    )
+    assert ficha.motivo == "reporte"
+    assert ficha.version_app == "2.1.0 (11)"
+    assert ficha.ota == "aae41f9"
+    assert ficha.sistema == "iOS 18.7.10"
+    assert ficha.dispositivo == "iPhone XR"
+    assert ficha.correo == "alguien@correo.com"
+    assert ficha.atributos()["ota"] == "aae41f9"
+
+
+def test_lee_el_fallo_de_conexion_con_la_universidad():
+    """El mensaje del botón "Reportar el fallo", tal como lo arma FalloPortal."""
+    ficha = leer_ficha(
+        "Hola 👋 No pude conectar el portal de UASD en Studiante.\n"
+        "\n"
+        "Error: Se quedó en \"Guardando tu horario…\".\n"
+        "Equipo: App v2.1.0 (21) · OTA a22f6fb · android 36 · SM-A155M · alguien@correo.com\n"
+        "Carrera: PIED5\n"
+        "Hora: 2026-09-24 22:45 (UTC-4)"
+    )
+    assert ficha.motivo == "portal"
+    assert ficha.etiquetas == ["portal"]
+    assert ficha.version_app == "2.1.0 (21)"
+    assert ficha.ota == "a22f6fb"
+    assert ficha.dispositivo == "SM-A155M"
+    assert ficha.carrera == "PIED5"
+

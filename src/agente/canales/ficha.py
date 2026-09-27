@@ -43,7 +43,11 @@ from dataclasses import dataclass, field
 _SEPARADOR = "·"
 
 _CORREO = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
-_VERSION_APP = re.compile(r"^App\s+v?(?P<v>[\w.+-]+)$", re.IGNORECASE)
+# Desde la 2.1.0 la versión lleva el build al lado ("App v2.1.0 (11)") y la
+# OTA va en su propia parte ("OTA aae41f9"). Sin esto, "App v2.1.0 (11)" no
+# casaba con nada y terminaba guardado como el MODELO del teléfono.
+_VERSION_APP = re.compile(r"^App\s+v?(?P<v>[\w.+-]+)(?:\s*\((?P<build>[\w.-]+)\))?$", re.IGNORECASE)
+_OTA = re.compile(r"^OTA\s+(?P<ota>[\w-]+)$", re.IGNORECASE)
 _SISTEMA = re.compile(r"^(?P<so>ios|android|ipados)\b\s*(?P<version>.*)$", re.IGNORECASE)
 
 
@@ -52,8 +56,9 @@ class Ficha:
     """Lo que se pudo leer del mensaje. Todo opcional: la gente también escribe
     sin pasar por la app."""
 
-    motivo: str = ""  # reporte | pensum-faltante | pensum-con-error
+    motivo: str = ""  # reporte | pensum-faltante | pensum-con-error | portal
     version_app: str = ""
+    ota: str = ""
     sistema: str = ""
     dispositivo: str = ""
     correo: str = ""
@@ -67,6 +72,7 @@ class Ficha:
             (
                 self.motivo,
                 self.version_app,
+                self.ota,
                 self.sistema,
                 self.dispositivo,
                 self.correo,
@@ -80,6 +86,7 @@ class Ficha:
         """Los datos con los nombres que van a los atributos del contacto."""
         pares = {
             "app_version": self.version_app,
+            "ota": self.ota,
             "sistema": self.sistema,
             "dispositivo": self.dispositivo,
             "universidad": self.universidad,
@@ -137,6 +144,10 @@ def _motivo(texto: str) -> str:
         return "pensum-faltante"
     if "error en un pensum" in cabeza:
         return "pensum-con-error"
+    # El botón "Reportar el fallo" de la pantalla que no pudo conectar la
+    # universidad (FalloPortal en la app).
+    if "no pude conectar el portal" in cabeza:
+        return "portal"
     return ""
 
 
@@ -149,7 +160,12 @@ def _leer_equipo(valor: str, ficha: Ficha) -> None:
 
         version = _VERSION_APP.match(parte)
         if version:
-            ficha.version_app = version.group("v")
+            build = version.group("build")
+            ficha.version_app = f"{version.group('v')} ({build})" if build else version.group("v")
+            continue
+        ota = _OTA.match(parte)
+        if ota:
+            ficha.ota = ota.group("ota")
             continue
 
         sistema = _SISTEMA.match(parte)

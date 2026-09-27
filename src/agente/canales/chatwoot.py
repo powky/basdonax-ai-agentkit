@@ -309,6 +309,7 @@ class Chatwoot(Canal):
     # bandeja. Ver ficha.atributos(): las claves tienen que coincidir.
     ATRIBUTOS = {
         "app_version": "Versión de la app",
+        "ota": "Actualización (OTA)",
         "sistema": "Sistema",
         "dispositivo": "Dispositivo",
         "universidad": "Universidad",
