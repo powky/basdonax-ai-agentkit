@@ -1,6 +1,6 @@
 # Cómo se usa la app
 
-Este es el manual de la versión **2.1.0**, la que está en las tiendas. Úsalo
+Este es el manual de la versión **2.2.0**, la que está en las tiendas. Úsalo
 cuando alguien está perdido y hay que guiarlo, o cuando reporta algo que parece
 un fallo. No lo recites: dale **solo el pedazo que necesita**, en pasos cortos,
 uno por línea. Si algo de acá no responde su pregunta, no lo estires: es mejor
@@ -13,10 +13,11 @@ pantalla: úsalos tal cual para que los reconozca.
 
 ## Versiones
 
-- La versión de las tiendas es la **2.1.0**. En la línea "Equipo" de los
-  mensajes que vienen de la app ves la suya (por ejemplo "App v2.1.0 (11)").
-- Si tiene una **1.x o una 2.0.x**, lo primero es que actualice desde App Store
-  o Google Play: muchos fallos ya están resueltos ahí.
+- La versión de las tiendas es la **2.2.0**. En la línea "Equipo" de los
+  mensajes que vienen de la app ves la suya (por ejemplo "App v2.2.0 (18)").
+- Si tiene una **1.x, 2.0.x o 2.1.x**, lo primero es que actualice desde App
+  Store o Google Play: muchos fallos ya están resueltos ahí, y las tutorías
+  solo existen desde la 2.2.0.
 - La app también recibe arreglos por dentro, sin pasar por la tienda. Cerrarla
   del todo y volver a abrirla hace que tome el último.
 
@@ -24,12 +25,16 @@ pantalla: úsalos tal cual para que los reconozca.
 
 Abajo hay tres pestañas:
 
-- **Horario**: las clases de cada día, los amigos, las alertas, el calendario
-  y los apuntes de cada materia.
+- **Horario**: las clases de cada día, los amigos, las alertas, el calendario,
+  los apuntes de cada materia y, debajo de cada clase, sus tutores.
 - **Pensum**: las materias por cuatrimestre, la sincronización con su
   universidad, el índice y la trayectoria.
 - **Cuenta**: su perfil (foto, @usuario, índice, estrellas, amigos), el avance
-  de carrera, el perfil vocacional, la ayuda y el botón **"Configuración"**.
+  de carrera, el perfil vocacional, **"Hazte tutor"**, la ayuda y el botón
+  **"Configuración"**.
+
+En **iPad y tablets Android** la app se reparte en dos columnas cuando el
+aparato está en horizontal.
 
 ## Entrar y crear la cuenta
 
@@ -83,6 +88,13 @@ universidad".
 **Actualizar:** nada se actualiza solo; cada vez lo inicia la persona. En el
 Pensum, el mismo botón pasa a decir **"Actualizar"** con las siglas. Lo ideal es
 actualizar cuando la universidad publica las notas de cada cuatrimestre.
+
+**Notas recién publicadas (UASD y UNICARIBE).** Estas universidades publican la
+nota final unos días antes de pasarla al récord. Desde la 2.2.0, al actualizar,
+la materia que ya tiene nota publicada sale aprobada con su nota aunque el récord
+todavía no la tenga. El **índice** sí espera a que la universidad lo actualice.
+En las demás universidades la nota entra cuando la universidad la pasa al
+récord.
 
 ## El pensum
 
@@ -168,16 +180,34 @@ y no puede tener estrella.
 
 ## El horario
 
-Si está vacío, "Agrega tu horario" ofrece:
+Si está vacío dice **"Aún no tienes horario"**, con **"Agregar con IA"** y
+**"Agregar manualmente"**. Con horario ya puesto, lo mismo se abre desde
+**"Actualizar"**, arriba en el Horario.
 
-1. **"Traerlo de mi universidad"** — la sincronización, solo el horario.
-2. **"Tomar foto"** del horario impreso.
-3. **"Subir del carrete"** — una o varias capturas.
-4. **"Subir documento"**.
-5. **"Prefiero llenarlo a mano"**.
+"Agregar con IA" abre **"Agrega tu horario"**:
+
+- **"Directo de mi universidad"** (la tarjeta de arriba): la sincronización,
+  solo el horario, donde su universidad la tiene.
+- **"Captura"**, **"Foto"** o **"PDF o Excel"**: adjunta su horario. Hasta 8
+  archivos, y puede escribir un detalle opcional. Toca la flecha y la app lo
+  lee ("Encontrando tus materias", "Ordenando días y horas"…). Al terminar sale
+  **"Revisa lo que encontré"** para corregir antes de guardar. Los archivos se
+  procesan y se descartan.
+- Se pueden hacer **5 lecturas al día**. Pasado eso: "Llegaste al límite de
+  lecturas de horario por hoy…": que lo intente mañana o lo llene a mano.
+- Si la lectura falla: "No pudimos leerlo", con "Intentar de nuevo" y "Cambiar
+  archivos". Una captura nítida del horario de su universidad es lo que mejor
+  funciona.
+
+Algunas personas todavía ven la pantalla anterior, con "Traerlo de mi
+universidad", "Tomar foto", "Subir del carrete" y "Subir documento": funciona
+igual.
 
 Una clase a mano se agrega desde el menú del horario → "Agregar clase":
 materia, profesor, edificio, aula, días y horas.
+
+Si se cambia a una carrera de **otra universidad**, la app pregunta qué hacer
+con el horario viejo: "Traerlo de …", "Borrarlo" o "Dejarlo así".
 
 **Apuntes.** Cada clase tiene sus apuntes: notas y recordatorios con fecha y
 aviso. Si cambia o vuelve a importar su horario, sus apuntes no se pierden: al
@@ -220,7 +250,10 @@ Ya existen desde la 2.1.0: **"Horario de hoy"** y **"Avance de carrera"**.
   bloqueada: mantenerla presionada → "Personalizar" → la pantalla bloqueada →
   añadir widget.
 - **Android**: mantener presionada la pantalla de inicio → "Widgets" → buscar
-  Studiante. Por ahora, solo en la pantalla de inicio.
+  Studiante. Desde la 2.2.0 también hay **"Horario · bloqueo"** y **"Avance ·
+  bloqueo"** para la pantalla bloqueada, pero solo en teléfonos con **Android
+  16** que ya traen los widgets en la pantalla bloqueada; se agregan desde la
+  propia pantalla bloqueada, no desde la de inicio.
 
 Si dice "Abre Studiante", que abra la app una vez para que se llene. El widget
 enseña lo mismo que la app: si en la app no hay índice ni honor, en el widget
@@ -229,9 +262,11 @@ tampoco.
 ## Amigos
 
 - **Dónde**: pestaña Horario → **"Amigos"**.
-- **Agregar**: "Agregar" y luego buscar por @usuario, enseñar su código QR,
-  escanear el de otra persona, o compartir su enlace de invitación. Quien abre
-  ese enlace y toca "Agregar como amigo" queda como su amigo de una vez.
+- **Agregar**: "Agregar" y luego buscarlo por **nombre o @usuario** (busca
+  mientras se escribe), enseñar su código QR, escanear el de otra persona, o
+  compartir su enlace de invitación. Quien abre ese enlace y toca "Agregar como
+  amigo" queda como su amigo de una vez. Si alguien no sale buscando, puede que
+  haya apagado "Aparecer en la búsqueda": que se agreguen con el código.
 - **Qué ven**: en el horario, qué amigos van a su misma clase y quiénes están
   libres en sus horas libres, y en el perfil, su avance.
 - **Privacidad**: en Amigos → "Privacidad" (o Configuración → "Quién ve tu
@@ -246,6 +281,75 @@ o la sección cuando las tiene. Si su universidad no da el aula ni la sección,
 dos secciones de la misma materia a la misma hora se pueden confundir.
 Explícaselo y anótalo como bug con su universidad.
 
+## Tutorías
+
+Existen desde la **2.2.0**. Son estudiantes que dan tutorías de las materias que
+dominan; el estudiante les escribe directo por WhatsApp. **Studiante no cobra
+comisión ni intermedia**: el precio, el horario y el lugar los acuerdan ellos.
+
+### Buscar un tutor
+
+1. Pestaña **Horario** → debajo de cada clase hay un botón: **"N tutores de
+   {área}"**, o **"Buscar tutor de {área}"** si todavía no hay. También está en
+   los apuntes de esa materia.
+2. Sale **"Tutores de {área}"**, con los tutores **de su universidad**: si son
+   virtuales o presenciales, sus recomendaciones y su descripción.
+3. **"Escribir por WhatsApp"** abre WhatsApp con un mensaje ya escrito.
+
+- **"Todavía no hay tutores de {área} en {universidad}"**: nadie la da todavía.
+  Saldrán ahí cuando alguien empiece.
+- **El área está mal**: abajo, "¿No es de {área}? Cambiar". Si elige "Ninguna
+  de estas", ese botón desaparece de la clase.
+- **No le sale el botón**: o tiene una versión anterior a la 2.2.0 (que
+  actualice), o esa materia no tiene área de tutoría.
+- **Recomendar**: unos días después de escribirle a un tutor le llega
+  "¿Recomiendas a {nombre}?". Solo recomiendan quienes le escribieron desde
+  Studiante, y nadie ve quién respondió.
+- **El orden**: "Nadie paga por salir primero": los tutores rotan y el orden
+  cambia cada día.
+
+### Hacerse tutor
+
+1. Cuenta → **"Hazte tutor"** (también en Configuración → "Tutorías", o en la
+   lista de tutores → "Quiero ser tutor").
+2. Elige las **áreas** que enseña ("¿Qué áreas enseñas?"), en qué
+   **universidades** (la suya viene puesta) y llena **"Tu perfil de tutor"**:
+   - una descripción de 20 a 280 caracteres, **sin teléfonos, correos, enlaces
+     ni @usuarios**;
+   - su **WhatsApp**, que tiene que ser de RD (809, 829 o 849);
+   - si da tutorías virtuales, presenciales o ambas.
+3. Paga con una **suscripción mensual del App Store o de Google Play**. **El
+   primer mes es gratis** la primera vez.
+
+**Precio.** El plan no se elige: la app pone el más barato que cubre las áreas y
+universidades que marcó, y le enseña el precio antes de pagar. Va desde
+**US$9.99 al mes** (Básico) hasta US$59.99 (Pro, varias universidades); el
+precio exacto es el que muestra su tienda.
+
+**Gestionar o cancelar.** Cuenta → **"Mi perfil de tutor"** (o la tarjeta
+"Perfil de tutor"): "Cambiar áreas o universidades", "Editar perfil" y
+**"Administrar suscripción"**, que abre la tienda para cancelar o cambiar el
+pago. **La app no cancela ni devuelve dinero**: los reembolsos los decide Apple
+o Google desde su tienda. Si cancela, sigue saliendo hasta que termine el mes
+pagado.
+
+Lo que puede ver en su perfil de tutor:
+
+- **"Pago pendiente"**: la tienda no pudo cobrar. Que actualice su método de
+  pago en el App Store o Google Play; mientras tanto sigue saliendo un tiempo.
+- **"En revisión"**: el equipo ocultó su perfil y no sale en las materias.
+  Pásalo a una persona.
+- **"Llena · lista de espera"** en un área: ya no hay cupo en esa universidad.
+  Puede anotarse gratis y le llega "Se abrió un cupo" cuando haya.
+- **"Ese WhatsApp ya está en otro perfil de tutor"**: pásalo a una persona.
+- **"¿Das más áreas o eres academia? Escríbenos"**: pásalo a una persona.
+
+Mientras tiene el plan activo lleva el **sello de tutor** junto a su nombre.
+Cuando el plan termina deja de salir en las materias y el sello se quita.
+
+Pasa a una persona todo lo que sea **cobros, reembolsos o un perfil "En
+revisión"**: tú no puedes ver los pagos.
+
 ## Perfil vocacional
 
 Cuenta → **"Perfil vocacional"** → "Descubre tu carrera ideal". Son unos 7
@@ -257,6 +361,7 @@ que van con esa persona.
 Está en Cuenta → **"Configuración"**:
 
 - **Cuenta**: "Correo" y "Usuario".
+- **Tutorías**: "Hazte tutor", o "Mi perfil de tutor" si ya lo es.
 - **Privacidad**: "Quién ve tu perfil", "Personas bloqueadas", "Compartir
   datos de uso" y "Qué pasa al conectar tu portal". Ese último es el texto que
   explica qué pasa con sus datos al sincronizar.
@@ -373,9 +478,27 @@ mensaje exacto.
 
 Por ejemplo "Se quedó en 'Abriendo tu expediente…'. El portal no llegó a la
 pantalla que esperábamos", o "nos devuelve al inicio en vez de abrir tus
-consultas". Que actualice la app si no está en la 2.1.0, y que lo intente otra
+consultas". Que actualice la app si no está en la 2.2.0, y que lo intente otra
 vez. Si vuelve a fallar, anótalo como bug con el error tal cual y la
 universidad, y pásalo a una persona.
+
+### "Estamos presentando problemas. Inténtalo más tarde."
+
+Sale arriba en la app cuando el servicio que mantiene la sesión abierta está
+fallando (no es su teléfono ni su cuenta). La app reintenta sola y el aviso se
+va solo cuando vuelve; lo que no cargó se carga en ese momento. Que **no cierre
+sesión ni borre la app**: que espere unos minutos. Si dura más de una hora,
+pásalo a una persona.
+
+### "Ya publicaron mi nota y en la app no sale"
+
+- **UASD o UNICARIBE**: que toque "Actualizar" en el Pensum. Desde la 2.2.0 la
+  nota publicada entra aunque la universidad no la haya pasado al récord. El
+  índice cambia cuando la universidad lo actualice.
+- **Otras universidades**: la nota entra cuando la universidad la pasa al
+  récord. Que actualice en unos días.
+- Si tiene sincronización y después de actualizar sigue sin salir, pásalo a una
+  persona con su universidad y la materia.
 
 ### "No carga ni encuentra mi universidad"
 
@@ -396,7 +519,8 @@ feature:
 - Poner o corregir notas a mano.
 - Llevar las inasistencias por clase.
 - Ver las horas en formato de 24 horas.
-- Una versión web: la app es solo para iPhone y Android. El enlace para
-  instalarla es https://studiante.app/get.
-- Un diseño especial para iPad.
+- Una versión web: la app es solo para iPhone y Android (también iPad y
+  tablets). El enlace para instalarla es https://studiante.app/get.
 - Exportar los datos.
+- Cobrar o pagar las tutorías dentro de la app: eso lo acuerdan el estudiante y
+  el tutor entre ellos.
