@@ -1,6 +1,6 @@
 # Cómo se usa la app
 
-Este es el manual de la versión **2.2.0**, la que está en las tiendas. Úsalo
+Este es el manual de la versión **2.3.0**, la que está en las tiendas. Úsalo
 cuando alguien está perdido y hay que guiarlo, o cuando reporta algo que parece
 un fallo. No lo recites: dale **solo el pedazo que necesita**, en pasos cortos,
 uno por línea. Si algo de acá no responde su pregunta, no lo estires: es mejor
@@ -13,25 +13,32 @@ pantalla: úsalos tal cual para que los reconozca.
 
 ## Versiones
 
-- La versión de las tiendas es la **2.2.0**. En la línea "Equipo" de los
-  mensajes que vienen de la app ves la suya (por ejemplo "App v2.2.0 (18)").
-- Si tiene una **1.x, 2.0.x o 2.1.x**, lo primero es que actualice desde App
-  Store o Google Play: muchos fallos ya están resueltos ahí, y las tutorías
-  solo existen desde la 2.2.0.
+- La versión de las tiendas es la **2.3.0**. En la línea "Equipo" de los
+  mensajes que vienen de la app ves la suya: "App v2.3.0 (22)" en iPhone y
+  "App v2.3.0 (29)" en Android.
+- Si tiene una **1.x, 2.0.x, 2.1.x o 2.2.x**, lo primero es que actualice desde
+  App Store o Google Play: muchos fallos ya están resueltos ahí, las tutorías
+  existen desde la 2.2.0, y los mensajes con amigos, los apuntes compartidos,
+  el aviso para juntarse y la pantalla de honores, desde la 2.3.0.
 - La app también recibe arreglos por dentro, sin pasar por la tienda. Cerrarla
-  del todo y volver a abrirla hace que tome el último.
+  del todo y volver a abrirla hace que tome el último. El botón de mensajes del
+  Horario llegó así el 10 de octubre: si tiene la 2.3.0 y no lo ve, que la
+  cierre del todo y la vuelva a abrir.
 
 ## Cómo está organizada
 
 Abajo hay tres pestañas:
 
-- **Horario**: las clases de cada día, los amigos, las alertas, el calendario,
-  los apuntes de cada materia y, debajo de cada clase, sus tutores.
+- **Horario**: las clases de cada día, los amigos y sus mensajes, quién está
+  libre a la misma hora, las alertas, el calendario, los apuntes de cada
+  materia y, debajo de cada clase, sus tutores.
 - **Pensum**: las materias por cuatrimestre, la sincronización con su
   universidad, el índice y la trayectoria.
 - **Cuenta**: su perfil (foto, @usuario, índice, estrellas, amigos), el avance
   de carrera, el perfil vocacional, **"Hazte tutor"**, la ayuda y el botón
-  **"Configuración"**.
+  **"Configuración"**. Arriba a la derecha, **"Novedades"** vuelve a abrir lo
+  nuevo de la 2.3 ("Lo nuevo de Studiante 2.3"), que sale solo una vez en el
+  Horario.
 
 En **iPad y tablets Android** la app se reparte en dos columnas cuando el
 aparato está en horizontal.
@@ -42,7 +49,17 @@ aparato está en horizontal.
    iPhone) o **Google**. El mismo camino sirve para crear la cuenta o entrar.
 2. Con correo, llega un **código de 6 dígitos** que se escribe en "Verifica tu
    correo". Ya no se usa un enlace.
-3. Elige su universidad y su carrera, su @usuario y, si quiere, su foto.
+3. Con correo, pone su nombre (con Google o Apple ya viene). Después, en los
+   tres casos: elige su **@usuario** ("Elige tu usuario"), su foto si quiere
+   ("Ponle cara a tu perfil"), cómo prefiere ver la app ("¿Cómo prefieres
+   verla?") y, al final, **su universidad y su carrera**.
+4. En el camino le sale una vez "Necesito tu ayuda", que pide seguirnos en
+   Instagram. No es obligatorio: **"Ya te sigo"** continúa.
+
+Si entró con Google o Apple y terminó en un horario vacío sin haber elegido
+carrera, le pasó lo que se arregló el 10 de octubre: que cierre la app del todo
+y la vuelva a abrir, y elija su carrera en la pestaña Pensum → "Seleccionar
+pensum".
 
 **"No me llega el código."** Que revise spam o promociones y que el correo esté
 bien escrito (en esa pantalla está "Cambiar correo"). Pasado un minuto puede
@@ -82,6 +99,13 @@ sus materias a mano y el índice no aparece.
    se la pides.
 4. Al terminar, "Tu récord está al día" con lo que se marcó.
 
+**"Antes de conectar" le volvió a salir.** Con la 2.3.0 le sale otra vez a todo
+el mundo, una sola vez, porque se le agregó un punto: Studiante guarda su
+**nombre y matrícula** tal como aparecen en su universidad, por seguridad. Sirven
+para que el chat sea solo de estudiantes de verdad y, si alguien lo usa para
+hacer daño, para identificar la cuenta ante las autoridades. Nadie los ve en la
+app y se borran con su cuenta. Es normal: "Entendido, conectar" y sigue.
+
 **Solo el horario:** pestaña Horario → "Agrega tu horario" → "Traerlo de mi
 universidad".
 
@@ -112,7 +136,7 @@ Con sincronización esto se marca solo. A mano, se marca según el estado real.
 - **Prerrequisitos**: si intenta poner en curso una materia sin haber aprobado
   lo que pide, la app se lo avisa ("Para cursarla primero debes aprobar…") y
   puede ponerla en curso de todos modos.
-- **Electivas**: en el hueco de la electiva, "Elegir" → escoge la materia →
+- **Electivas**: en la casilla de la electiva, "Elegir" → escoge la materia →
   "Confirmar selección". Si su universidad no la ofrece: "No la ofrecen —
   contar como aprobada".
 - **Convalidadas**: se marcan como aprobadas; no hay un estado aparte. Con
@@ -162,14 +186,35 @@ quien otorga el honor al graduarse es la universidad. Hacen falta tres cosas:
 
 - Que su universidad esté entre las que tienen tabla de honores en la app:
   UASD, UAPA, UNICARIBE, PUCMM, UTESA, UNPHU, O&M, UNAPEC, UNIBE, INTEC, ITLA,
-  UNICDA, IEESL, UFHEC, UNIREMHOS, UCNE, UCSD, ISFODOSU, ISA y UCATEBA.
+  UNICDA, IEESL, UFHEC, UNIREMHOS, UCNE, UCSD, ISFODOSU, ISA, UCATEBA y UNAD.
 - Que tenga índice, o sea, que haya conectado su universidad.
 - Que **no tenga ninguna materia reprobada** en la carrera, aunque la haya
-  repetido y aprobado después. Es la regla de los reglamentos.
+  repetido y aprobado después. Es la regla de los reglamentos. **En la UASD no
+  aplica**: ahí el honor sale solo del índice (Cum Laude desde 85, Magna con más
+  de 90 y Summa con más de 95).
 
 Si falta cualquiera de las tres, el honor no sale en ningún lado, tampoco en el
 widget. Cuando sale, está en Cuenta → "Avance de carrera" ("Vas por…") y junto
 al índice.
+
+**"¿Por qué no me salen honores?"** Desde la 2.3.0 la app lo dice sola. Que toque
+su índice (la columna del índice en el Pensum, o el índice en Cuenta) → **"¿Por
+qué no me salen honores?"** (o "Ver tus honores" si ya tiene uno). Sale **"Tus
+honores"** con el motivo:
+
+- **"Reprobaste una materia"**: con cuál, en qué período y con qué nota, y si
+  después la aprobó o la está repitiendo.
+- **"Tu índice no llega a Cum Laude"**: cuánto le falta. Cuenta el índice con
+  el que se gradúe, así que todavía puede subirlo.
+- **"Falta tu índice"**: tiene que conectar su universidad (ahí mismo está el
+  botón).
+- **"No tenemos la regla de tu universidad"**: su universidad no está en la
+  lista de arriba. Anótalo como feature con su universidad.
+- Si ya tiene honor: "Para … te faltan …", lo que le falta para el siguiente.
+
+Si dice que un dato está mal (por ejemplo, que esa materia la convalidó y no la
+reprobó), abajo está **"¿Algún dato está mal?"** → "Avisar por WhatsApp", que
+manda el mensaje armado con todo (ver "Mensajes que llegan armados").
 
 **Estrellas.** Una estrella es una materia aprobada con la nota más alta que
 puede dar su universidad: **95 o más** si la nota viene en número, o la letra
@@ -180,11 +225,12 @@ y no puede tener estrella.
 
 ## El horario
 
-Si está vacío dice **"Aún no tienes horario"**, con **"Agregar con IA"** y
-**"Agregar manualmente"**. Con horario ya puesto, lo mismo se abre desde
+Si está vacío dice **"Aún no tienes horario"**, con **"Agregar mi horario"** y
+**"Agregar manualmente"** (en versiones anteriores el primero tenía otro nombre,
+pero hace lo mismo). Con horario ya puesto, lo mismo se abre desde
 **"Actualizar"**, arriba en el Horario.
 
-"Agregar con IA" abre **"Agrega tu horario"**:
+"Agregar mi horario" abre **"Agrega tu horario"**:
 
 - **"Directo de mi universidad"** (la tarjeta de arriba): la sincronización,
   solo el horario, donde su universidad la tiene.
@@ -261,14 +307,16 @@ tampoco.
 
 ## Amigos
 
-- **Dónde**: pestaña Horario → **"Amigos"**.
+- **Dónde**: pestaña Horario → **"Amigos"**. El botón redondo de los mensajes,
+  al lado, también abre Amigos.
 - **Agregar**: "Agregar" y luego buscarlo por **nombre o @usuario** (busca
   mientras se escribe), enseñar su código QR, escanear el de otra persona, o
   compartir su enlace de invitación. Quien abre ese enlace y toca "Agregar como
   amigo" queda como su amigo de una vez. Si alguien no sale buscando, puede que
   haya apagado "Aparecer en la búsqueda": que se agreguen con el código.
 - **Qué ven**: en el horario, qué amigos van a su misma clase y quiénes están
-  libres en sus horas libres, y en el perfil, su avance.
+  libres a la misma hora (ver "Quién está libre a la misma hora" más abajo), y
+  en el perfil, su avance.
 - **Privacidad**: en Amigos → "Privacidad" (o Configuración → "Quién ve tu
   perfil"). Para cada dato elige "Todos", "Amigos", "Elegir…" (solo algunos) o
   "Nadie". Ahí también está "Aparecer en la búsqueda". El índice nunca lo ve
@@ -280,6 +328,148 @@ misma clase cuando coinciden el día, la hora y la materia, afinando con el aula
 o la sección cuando las tiene. Si su universidad no da el aula ni la sección,
 dos secciones de la misma materia a la misma hora se pueden confundir.
 Explícaselo y anótalo como bug con su universidad.
+
+## Mensajes con sus amigos
+
+Desde la **2.3.0** puede escribirle a un amigo sin salir de la app. Solo entre
+**amigos**: a alguien que no es su amigo no se le puede escribir, y no hay
+solicitudes de mensaje.
+
+**Quién lo tiene.** Quien ya conectó su universidad, o quien es de una
+universidad que tiene sincronización. A los demás no les sale nada del chat. Y
+con cada amigo, solo si ese amigo también lo tiene: si al lado de un amigo no
+sale la burbuja, es que ese amigo no lo tiene.
+
+**Para escribir hay que haber conectado su universidad** al menos una vez. Sin
+eso puede leer lo que le escriban, pero en vez del cuadro para escribir le sale
+un aviso para sincronizar, con su botón. Es para que el chat sea solo de
+estudiantes de verdad y sin spam.
+
+**Dónde se escribe:**
+
+- Pestaña Horario → "Amigos" → la burbuja al lado de cada amigo. Quien le
+  escribió sale arriba, con en rojo cuántos mensajes tiene sin leer.
+- En el Horario, el botón redondo con la burbuja, al lado de "Amigos", lleva el
+  número de mensajes sin leer y abre Amigos.
+- En el perfil de un amigo, **"Enviar mensaje"**.
+- En las listas de amigos libres o de la misma clase, la misma burbuja.
+- Los avisos traen el nombre de quien escribe y el mensaje; tocarlo abre la
+  conversación.
+
+No hay una bandeja aparte: las conversaciones se abren desde Amigos.
+
+**Qué se puede hacer:**
+
+- Solo **texto**: no se mandan fotos, audios ni archivos, no hay grupos, y un
+  mensaje enviado no se puede borrar ni editar.
+- **Me gusta**: dos toques en el mensaje del amigo, o mantenerlo presionado →
+  "Me gusta".
+- **Responder** un mensaje: deslizarlo a la derecha, o mantenerlo presionado →
+  "Responder".
+- Si el amigo escribe un número de teléfono, debajo sale "Abrir en WhatsApp".
+- En el menú de arriba (⋯): "Ver perfil", "Eliminar chat", "Bloquear" y
+  "Reportar".
+
+**Eliminar chat** lo borra solo de su lado, en su cuenta (en todos sus
+teléfonos): el amigo conserva el suyo. Si alguno vuelve a escribir, empieza de
+nuevo.
+
+**Bloquear** hace que dejen de ser amigos y que no puedan escribirse ni verse.
+Se deshace en Configuración → "Personas bloqueadas", pero desbloquear **no
+devuelve la amistad**: para volver a escribirse hay que mandar una solicitud
+otra vez.
+
+**Reportar un mensaje:** mantener presionado el mensaje → "Reportar mensaje" →
+contar qué pasó → "Enviar reporte". Lo revisa una persona del equipo, nadie le
+dice a la otra persona quién reportó, y ahí mismo puede "Bloquear también". El
+equipo no lee las conversaciones: solo ve lo que se reporta.
+
+**Cuando un mensaje no sale**, debajo dice por qué:
+
+- "Tiene palabras que no se permiten en el chat." — insultos de odio o acoso
+  sexual. Las malas palabras de siempre sí pasan.
+- "En el chat no se venden tutorías ni trabajos…" — para ofrecer tutorías está
+  "Hazte tutor".
+- "En Studiante no se vende ni se consigue nada ilegal."
+- "Ya enviaste este mismo mensaje a varias personas hoy." — un mismo mensaje
+  largo llega como mucho a 4 personas por día.
+- "Vas muy rápido. Espera un momento." — más de 30 mensajes en un minuto.
+- "No puedes enviar mensajes." — el equipo le quitó el chat por un tiempo.
+  Pásalo a una persona.
+- "Solo puedes escribirle a tus amigos." o "Ya no son amigos…" — dejaron de
+  ser amigos.
+- "Sin conexión. Toca para reintentar." o "No se envió. Toca para reintentar."
+  — que lo toque con buena conexión. El segundo también sale si llegó al tope
+  de 1000 mensajes en el día.
+- Cada mensaje puede tener hasta 2000 caracteres.
+
+**"Le escribo y no me contesta."** No supongas ni digas que lo bloquearon: la
+app no lo dice a propósito, y tú tampoco puedes saberlo. Dile que la otra
+persona lo ve cuando abra la app, y que revise que siguen siendo amigos.
+
+**Si cuenta que alguien lo acosa o lo amenaza por el chat:** que reporte el
+mensaje y bloquee desde la app, y pásalo a una persona.
+
+Los mensajes se guardan hasta que alguno de los dos borre su cuenta.
+
+## Apuntes compartidos
+
+Desde la 2.3.0, un apunte o un recordatorio se comparte **mencionando** a sus
+amigos:
+
+- Al escribir **"@"** en el título o el texto sale una barra con sus amigos:
+  tocar a uno lo menciona. Escribir "@Ana" a mano, sin tocarla en la barra,
+  **no** la menciona.
+- O en "Compartir" → **"Mencionar amigos"**, marcando a quién.
+- Se comparte al **guardar**. Solo con amigos, y hasta 20 por apunte.
+- Para quitar a alguien hay que desmarcarlo en "Mencionar amigos": borrar
+  "@Ana" del texto no la quita.
+
+Al amigo le llega un aviso ("… te mencionó en un apunte" o "en un
+recordatorio") y le sale en sus apuntes de esa materia, con "De …". Si no tiene
+esa clase, le sale al final del Horario, en "Apuntes de materias fuera del
+horario". Los recordatorios le suenan a él también.
+
+- **Solo quien lo escribió puede editarlo**, y los cambios le llegan solos al
+  amigo.
+- El amigo puede marcarlo hecho o fijarlo arriba (solo para él), o "Quitar de
+  mis apuntes" (quien lo escribió no se entera).
+- Si quien lo escribió lo borra, se va de todos. Si dejan de ser amigos o se
+  bloquean, se va lo que se compartieron.
+
+## Quién está libre a la misma hora, y avisar para juntarse
+
+Entre dos clases, el Horario enseña su tiempo libre y qué amigos están libres
+también:
+
+- "4h 10m libre" y debajo, en verde, por ejemplo "4 libres · 3 se suman
+  después", o "2 libres desde las 11:00 am".
+- "Ningún amigo libre a esta hora", en gris, si no hay nadie.
+- Al final del día, **"Sin más clases"**: los amigos que también ya salieron.
+
+Tocándolo sale la lista "N amigos libres contigo" (o "N amigos ya salieron"),
+con cada amigo y desde cuándo está libre ("Libre desde hace 30 minutos",
+"Libre desde las 11:00 am"…).
+
+**Por qué un amigo no sale libre.** Solo salen los amigos que comparten su
+"Horario libre" y que probablemente están en la universidad: ese día tuvieron
+una clase presencial que terminó hace menos de 3 horas, o les queda otra más
+tarde. Un amigo que ese día no tiene clases, o que todavía no ha empezado, no
+sale. Cada quien lo decide en Amigos → "Privacidad" → **"Horario libre"**
+("Todos", "Amigos", "Elegir…" o "Nadie"; viene en "Amigos"). Ocultar el suyo no
+le oculta el de los demás.
+
+**Avisar para juntarse.** En esa lista está **"Avisarles para juntarse"**:
+
+1. Escribe un mensaje corto (hasta 100 caracteres) o deja el que trae la app.
+2. Toca "Avisar a los N" (o "Avisarle").
+3. A los amigos de la lista les llega "¡{su nombre} quiere juntarse!" con el
+   mensaje.
+
+Es **un aviso al día** por persona, y solo para el mismo día. Si el botón está
+gris o sale un error, es uno de estos: "Ya enviaste tu aviso de hoy", "Ese rato
+libre ya pasó", "Solo puedes avisar el mismo día", "Ese mensaje tiene palabras
+que no se permiten" o "Ninguno de ellos puede recibir el aviso ahora".
 
 ## Tutorías
 
@@ -388,6 +578,10 @@ correo). Reconócelos:
   faltante del prompt.
 - **"Encontré un error en un pensum de Studiante"** — reclamo de datos: se pasa
   a una persona.
+- **"Hola 👋 Creo que hay un dato mal en mis honores en Studiante."** — viene
+  de la pantalla de honores. Trae "Lo que veo mal" (lo que escribió la persona)
+  y "Lo que dice la app" (universidad, índice, el resultado y las reprobadas).
+  Es un reclamo de datos: pásalo a una persona tal cual.
 
 ## Casos que ya conocemos: qué pasa y qué contestar
 
@@ -459,10 +653,19 @@ las notas finales de este cuatrimestre, que vuelva a conectar desde la app
 (y su estrella si sacó 95 o más). Las notas de cuatrimestres anteriores no se
 pueden recuperar.
 
-### UCATEBA: el certificado, sin internet o fuera de servicio
+### "El certificado de seguridad… no está bien instalado"
 
-- "El certificado de seguridad… no está bien instalado": lo tiene que arreglar
-  la universidad. Que lo intente más adelante.
+Algunas universidades mandan su certificado de seguridad incompleto. Desde la
+**2.3.0, en Android**, la app lo completa sola: UFHEC, UNEFA y UNIREMHOS, que
+fallaban en Android, ya abren. Así que:
+
+1. Si está en Android con una versión anterior a la 2.3.0, que actualice desde
+   Google Play.
+2. Si ya tiene la 2.3.0 y le sigue saliendo, lo tiene que arreglar la
+   universidad: que lo intente más adelante.
+
+### UCATEBA: sin internet o fuera de servicio
+
 - "Parece que te quedaste sin internet": que revise su conexión.
 - "No está respondiendo ahora mismo": la página de la universidad está caída.
   Que lo intente en un rato.
@@ -524,3 +727,5 @@ feature:
 - Exportar los datos.
 - Cobrar o pagar las tutorías dentro de la app: eso lo acuerdan el estudiante y
   el tutor entre ellos.
+- En el chat: mandar fotos, audios o archivos, los chats de grupo, o borrar o
+  editar un mensaje ya enviado.
