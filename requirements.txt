@@ -1,25 +1,30 @@
 # Las versiones están acotadas a propósito: este repo vive en la
 # descripción de un video y no se tiene que romper solo cuando salga
 # la próxima versión mayor de LangChain.
+#
+# El piso (>=) es la última versión probada y sube cada vez que se revisan
+# las dependencias: así nadie se queda con una que ya tiene un arreglo de
+# seguridad publicado. El techo (<) no sube solo: saltar a una versión mayor
+# se hace a mano y probando.
 
 # --- LangChain + LangGraph -------------------------------------------------
 # LangGraph es lo que le da la memoria al agente y lo que después nos deja
 # enchufarlo a Telegram o WhatsApp sin reescribir el agente.
-langchain-core>=1.5,<2
-langgraph>=1.2,<2
-langgraph-checkpoint>=4.1,<5
-langgraph-checkpoint-sqlite>=3.1,<4   # la memoria de MODO=test
+langchain-core>=1.6.11,<2
+langgraph>=1.2.15,<2
+langgraph-checkpoint>=4.3.0,<5
+langgraph-checkpoint-sqlite>=3.1.2,<4   # la memoria de MODO=test
 
 # --- Proveedores de modelos ------------------------------------------------
 # Podés borrar los que no vayas a usar.
-langchain-anthropic>=1.5,<2     # Claude
-langchain-openai>=1.4,<2         # OpenAI
-langchain-google-genai>=4.3,<5   # Gemini
+langchain-anthropic>=1.7.6,<2     # Claude
+langchain-openai>=1.7.2,<2         # OpenAI
+langchain-google-genai>=4.4.2,<5   # Gemini
 
 # --- Plataforma de pruebas (la web local) ----------------------------------
-fastapi>=0.115,<1
-uvicorn>=0.30,<1
-python-dotenv>=1.0,<2
+fastapi>=0.143.2,<1
+uvicorn>=0.54.0,<1
+python-dotenv>=1.2.4,<2
 
 # --- Solo para MODO=produccion ---------------------------------------------
 # Descomentá estas dos líneas cuando pases a Postgres.
@@ -29,8 +34,19 @@ python-dotenv>=1.0,<2
 #
 # Y psycopg va con [binary] sí o sí en Windows: sin eso el import falla con
 # "no pq wrapper available" porque falta la libpq del sistema.
-# langgraph-checkpoint-postgres>=3.1,<4
-# psycopg[binary]>=3.2,<4
+# langgraph-checkpoint-postgres>=3.2.0,<4
+# psycopg[binary]>=3.3.6,<4
 
 # Las tools del MCP acotado de Studiante (catálogo + pedidos). Ver src/agente/mcp.py.
-langchain-mcp-adapters>=0.1.0
+# Sigue en 0.x, y ahí cualquier versión del medio puede romper: el techo es
+# la próxima de esas, no la 1.
+langchain-mcp-adapters>=0.3.2,<0.4
+
+# --- Pisos de seguridad ----------------------------------------------------
+# Estos no los usamos directo: llegan colgados de lo de arriba. Están solo
+# para obligar la versión que trae el arreglo de un aviso de seguridad
+# (pip-audit). Sin la línea, un entorno que ya los tenía instalados se queda
+# con la versión vieja, porque para pip igual cumple.
+mcp>=1.30.0,<2      # CVE-2026-59951: el servidor HTTP no liberaba las sesiones
+pyjwt>=2.15.0,<3    # una docena de avisos de la 2.13 (confusión de algoritmos, ReDoS)
+urllib3>=2.8.0,<3   # descompresión sin tope al leer en streaming; TLS del proxy

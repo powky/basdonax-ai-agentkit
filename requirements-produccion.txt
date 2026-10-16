@@ -3,18 +3,17 @@
 #
 #   pip install -r requirements-produccion.txt
 #
-# Es lo que instala el Dockerfile.
+# Es lo que instala el Dockerfile. Las tools del MCP de Studiante ya vienen
+# en el requirements.txt: no se repiten acá para que no haya dos versiones
+# que mantener a la par.
 -r requirements.txt
 
 # --- MODO=produccion: la memoria en Postgres -------------------------------
 # Tiene que ser 3.x: la serie 2.x arrastra un langgraph-checkpoint viejo que
 # se pelea con el langgraph del requirements.txt y deja el entorno roto.
-langgraph-checkpoint-postgres>=3.1,<4
+langgraph-checkpoint-postgres>=3.2.0,<4
 
 # Con [binary], que trae la libpq adentro. Sin eso hay que instalar la
 # libpq del sistema aparte, y el error que tira ("no pq wrapper available")
 # no se parece en nada a lo que falta.
-psycopg[binary]>=3.2,<4
-
-# Las tools del MCP acotado de Studiante (catálogo + pedidos). Ver src/agente/mcp.py.
-langchain-mcp-adapters>=0.1.0
+psycopg[binary]>=3.3.6,<4
