@@ -1,6 +1,8 @@
 # Cómo se usa la app
 
-Este es el manual de la versión **2.3.0**, la que está en las tiendas. Úsalo
+Este es el manual de la versión **2.3.0**, la que está en las tiendas, con lo
+que le ha llegado por dentro hasta el **16 de octubre** (Campus, entre otras
+cosas). Úsalo
 cuando alguien está perdido y hay que guiarlo, o cuando reporta algo que parece
 un fallo. No lo recites: dale **solo el pedazo que necesita**, en pasos cortos,
 uno por línea. Si algo de acá no responde su pregunta, no lo estires: es mejor
@@ -20,20 +22,33 @@ pantalla: úsalos tal cual para que los reconozca.
   App Store o Google Play: muchos fallos ya están resueltos ahí, las tutorías
   existen desde la 2.2.0, y los mensajes con amigos, los apuntes compartidos,
   el aviso para juntarse y la pantalla de honores, desde la 2.3.0.
-- La app también recibe arreglos por dentro, sin pasar por la tienda. Cerrarla
-  del todo y volver a abrirla hace que tome el último. El botón de mensajes del
-  Horario llegó así el 10 de octubre: si tiene la 2.3.0 y no lo ve, que la
-  cierre del todo y la vuelva a abrir.
+- La app también recibe arreglos y funciones por dentro, sin pasar por la
+  tienda. Cerrarla del todo y volver a abrirla hace que tome lo último. Si algo
+  de esta guía no le sale teniendo la 2.3.0, lo primero es eso: cerrarla del
+  todo y abrirla otra vez (a veces hacen falta dos veces).
+- Lo que llegó así después del 10 de octubre:
+  - **Campus** (ver su sección): para la UASD desde el 12 de octubre y para
+    UNAPEC desde el 14.
+  - **UTECO** con sincronización: récord e índice desde el 12 de octubre, y el
+    horario desde el 13.
+  - Honores de **O&M** solo por índice (12 de octubre).
+  - El chat con una **cuenta eliminada** (13 de octubre).
+  - El **calendario del teléfono** que para cuando termina el ciclo (15 de
+    octubre).
+  - Los **códigos de error** de Campus (16 de octubre).
 
 ## Cómo está organizada
 
-Abajo hay tres pestañas:
+Abajo hay tres pestañas, y una cuarta, **Campus**, para quien estudia en la
+UASD o en UNAPEC:
 
 - **Horario**: las clases de cada día, los amigos y sus mensajes, quién está
   libre a la misma hora, las alertas, el calendario, los apuntes de cada
   materia y, debajo de cada clase, sus tutores.
 - **Pensum**: las materias por cuatrimestre, la sincronización con su
   universidad, el índice y la trayectoria.
+- **Campus** (solo UASD y UNAPEC, entre Pensum y Cuenta): lo que su
+  universidad tiene en línea, traído a la app. Ver la sección "Campus".
 - **Cuenta**: su perfil (foto, @usuario, índice, estrellas, amigos), el avance
   de carrera, el perfil vocacional, **"Hazte tutor"**, la ayuda y el botón
   **"Configuración"**. Arriba a la derecha, **"Novedades"** vuelve a abrir lo
@@ -161,6 +176,103 @@ cursando ahora. Marcándolas bien, se corrige solo.
 **Ayudante de selección.** Para el que no sabe qué inscribir: sugiere la carga
 ideal, primero lo atrasado y después lo que más materias desbloquea.
 
+### Elegir el plan correcto: menciones y planes que se llaman parecido
+
+Al elegir carrera, las que tienen varios planes salen en **una sola fila** con
+un chip: "5 menciones", "N variantes" o "N pensums". Tocándola sale "Esta
+carrera tiene 5 menciones. Elige la tuya." (o "Hay N pensums de esta carrera.
+Elige el tuyo."), y cada opción trae su **código** y sus **créditos**. Se elige
+con "Elegir este pensum".
+
+**Cómo se nota que eligió el plan equivocado:** al conectar su universidad le
+sale "N materias de tu récord no están en este pensum." y el pensum queda a
+medio marcar, con materias que dio sin marcar.
+
+**Cómo se cambia** (no pierde nada):
+
+1. Pestaña Pensum → arriba, **"Cambiar"** (o tocar el título) → sale "Mis
+   pensums".
+2. **"Agregar pensum"** → su universidad → busca la carrera → elige el plan
+   correcto → "Elegir este pensum". Ese queda como el activo.
+3. En "Mis pensums", "Editar" → el zafacón en el equivocado, para quitarlo.
+4. Que vuelva a conectar su universidad (**"Actualizar"** en el Pensum): el
+   plan correcto se marca solo.
+
+Si los dos planes tienen el **mismo código**, la app pregunta "¿Cambiar de
+plan?" y el progreso se conserva. Si tienen códigos distintos, se agrega aparte
+y se marca con la sincronización.
+
+#### UASD, Psicología: hay dos familias de planes
+
+Son planes **distintos**, con materias distintas, y la gente los confunde porque
+se llaman casi igual:
+
+- **"Licenciatura en Psicología"** con **menciones**. Es **una sola fila**,
+  "Licenciatura en Psicología" con el chip "5 menciones". Hay que **tocarla** y
+  ahí salen las menciones:
+  - "Mención Psicología Clínica" (PSIC)
+  - "Mención Psicología Escolar" (PSIE)
+  - "Mención Psicología Industrial" (PSII)
+  - "Mención Psicología Social" (PSIS)
+  - "Mención Psicología del Desarrollo Humano" (HUMA)
+
+  Todas de **171 créditos**.
+- Las licenciaturas **sin mención**, cada una en su propia fila:
+  "Licenciatura en Psicología Clínica" (LPSC, 200 créditos), "Licenciatura en
+  Psicología Educativa" (LPSE), "Licenciatura en Psicología Organizacional"
+  (LPSO) y "Licenciatura en Psicología Social" (LPSS), de 194 a 200 créditos.
+
+**"Licenciatura en Psicología Clínica" NO es lo mismo que "Licenciatura en
+Psicología, Mención Psicología Clínica".** Quien estudia Clínica con mención
+tiene que tocar "Licenciatura en Psicología" y elegir "Mención Psicología
+Clínica" adentro, no la fila "Licenciatura en Psicología Clínica".
+
+Para saber cuál es la suya, pregúntale **una** de estas, en este orden:
+
+1. **Cómo se llama su carrera en su récord o en su selección de la UASD.** Si
+   dice "Mención", es la fila "Licenciatura en Psicología" y adentro su
+   mención. Si dice "Licenciatura en Psicología Clínica" a secas, es esa fila.
+2. Si no lo sabe: **¿en el primer semestre dio "Psicología General" o
+   "Psicología I"?**
+   - **"Psicología General"** (con "Orientación Institucional"; en el segundo,
+     "Bases Neurobiológicas de la Conducta" y "Conducta Animal") → la de
+     **menciones**: "Licenciatura en Psicología" → su mención.
+   - **"Psicología I"** (con "Orientación Institucional y Académica" y
+     "Laboratorio de Biología Básica") → la **licenciatura sin mención**:
+     "Licenciatura en Psicología Clínica", "Educativa", "Organizacional" o
+     "Social".
+
+#### UASD, Medicina: el pensum cambió y hay varios planes
+
+Al buscar "Medicina" salen:
+
+- **"Doctor en Medicina"** con el chip "3 pensums". Tocándola salen tres, y se
+  distinguen por el código y los créditos:
+  - **DMED**, 362 créditos. Es el que tiene casi todo el mundo.
+  - **MEDD**, 393 créditos. El plan nuevo.
+  - **"Plan 13"** (MED3), 280 créditos. El plan viejo, con códigos de tres
+    cifras (BIO100, MED133…).
+- **"Pre-Médica/Medicina"**, "Plan 14" (CS01), 362 créditos. Tiene las mismas
+  materias que DMED: si su récord dice "Pre-Médica/Medicina", elige esa; si
+  dice "Doctor en Medicina", DMED. Cualquiera de las dos le marca lo mismo.
+- **"Pre-Médica"** sola (4 semestres): es solo la etapa de premédica. Si ya
+  está en Medicina, no es esa.
+
+Para saber cuál es la suya, pregúntale **qué dio en el segundo semestre**:
+
+- **"Estructura y Sistemas Anatómicos"** o **"Inglés Técnico en Salud I"** →
+  **MEDD** (393 créditos). En el primero también tuvo "Orientación
+  Institucional y Académica", "Educación Física" y "Laboratorio de Física
+  Básica".
+- **"Biofísica"**, **"Fundamentos de Desarrollo Cognitivo"** o **"Vida en
+  Comunidad"** → **DMED** (o "Pre-Médica/Medicina" si así le dice su récord).
+- Códigos de **tres cifras** en su récord (BIO100, MED133, SAP103) →
+  **"Plan 13"**.
+
+Si después de elegir y conectar le siguen saliendo muchas materias "que no
+están en este pensum", pásalo a una persona con su universidad, el plan que
+eligió y el número que le sale.
+
 ## Índice, honores y estrellas
 
 **El índice es el que publica su universidad** y llega con la sincronización.
@@ -189,9 +301,14 @@ quien otorga el honor al graduarse es la universidad. Hacen falta tres cosas:
   UNICDA, IEESL, UFHEC, UNIREMHOS, UCNE, UCSD, ISFODOSU, ISA, UCATEBA y UNAD.
 - Que tenga índice, o sea, que haya conectado su universidad.
 - Que **no tenga ninguna materia reprobada** en la carrera, aunque la haya
-  repetido y aprobado después. Es la regla de los reglamentos. **En la UASD no
-  aplica**: ahí el honor sale solo del índice (Cum Laude desde 85, Magna con más
-  de 90 y Summa con más de 95).
+  repetido y aprobado después. Es la regla de los reglamentos. **En la UASD y en
+  O&M no aplica**: ahí el honor sale solo del índice. En la UASD, Cum Laude
+  desde 85, Magna con más de 90 y Summa con más de 95. En O&M, Cum Laude de 3.40
+  a 3.49, Magna de 3.50 a 3.79 y Summa de 3.80 a 4.00.
+- Lo que el reglamento no cuenta como reprobada tampoco quita el honor: los
+  retiros, por ejemplo, o en UNAPEC Matemática Pre-Universitaria, Matemática
+  Básica Universitaria y Deporte. Si cree que una materia no debería contar,
+  es un reclamo de datos (ver "¿Algún dato está mal?" abajo).
 
 Si falta cualquiera de las tres, el honor no sale en ningún lado, tampoco en el
 widget. Cuando sale, está en Cuenta → "Avance de carrera" ("Vas por…") y junto
@@ -286,6 +403,19 @@ Ya existe:
 Pide acceso completo al calendario. Las clases quedan como eventos de cada
 semana y se actualizan solas cuando cambia el horario. No suenan: para los
 avisos están las alertas de clase.
+
+**Hasta cuándo.** Desde el 15 de octubre, si su horario vino de su universidad
+y la universidad publica las fechas del ciclo, cada clase **para el día que
+termina el ciclo** y la pantalla dice "…cada semana hasta el …, cuando termina
+tu ciclo." Las clases agregadas a mano, leídas de una foto o sin fechas de la
+universidad siguen 20 semanas y se van extendiendo solas mientras usa la app.
+
+**"Me salen clases en enero" (o después de que termina el ciclo).** Que vuelva
+a traer su horario de su universidad ("Actualizar" en el Horario → "Directo de
+mi universidad") con la app al día: con las fechas nuevas el calendario se
+corta solo. Si su universidad no publica fechas o el horario lo puso a mano, por
+ahora no se puede: que apague el calendario cuando termine el ciclo y lo vuelva
+a encender con el horario nuevo.
 
 ## Widgets
 
@@ -411,6 +541,12 @@ persona lo ve cuando abra la app, y que revise que siguen siendo amigos.
 mensaje y bloquee desde la app, y pásalo a una persona.
 
 Los mensajes se guardan hasta que alguno de los dos borre su cuenta.
+
+**"Cuenta eliminada".** Si un amigo borró su cuenta, la conversación sigue en
+su lista como **"Cuenta eliminada"**, con una silueta gris. Puede leer todo lo
+que se dijeron, pero no escribir: en vez del cuadro sale "Esta cuenta se
+eliminó. Lo que se dijeron sigue aquí." No hay perfil que abrir. Si quiere
+quitarla, en el menú (⋯) está "Eliminar chat".
 
 ## Apuntes compartidos
 
@@ -540,6 +676,192 @@ Cuando el plan termina deja de salir en las materias y el sello se quita.
 Pasa a una persona todo lo que sea **cobros, reembolsos o un perfil "En
 revisión"**: tú no puedes ver los pagos.
 
+## Campus (UASD y UNAPEC)
+
+Es la pestaña **"Campus"**, entre Pensum y Cuenta: "Lo que tu universidad tiene
+en línea, traído a Studiante." Llegó por dentro, sin pasar por la tienda: para
+la UASD el 12 de octubre y para UNAPEC el 14.
+
+**Quién la ve.** Todo el que tiene como **pensum activo** uno de la **UASD** o
+de **UNAPEC**. Nadie más: las otras universidades todavía no tienen Campus (si
+lo pide, anótalo como feature con su universidad). Un estudiante de la UASD ve
+solo lo de la UASD, y uno de UNAPEC solo lo de UNAPEC.
+
+**"No me sale Campus."** En este orden:
+
+1. Que su pensum **activo** sea de la UASD o de UNAPEC (en la pestaña Pensum,
+   "Cambiar" → el que está marcado). Si tiene dos carreras, Campus sigue a la
+   activa.
+2. Que cierre la app del todo y la abra otra vez, hasta dos veces: Campus llega
+   por dentro.
+3. Que tenga la 2.3.0. Si no, que actualice.
+4. Si con todo eso no le sale, pásalo a una persona.
+
+Abajo de Campus dice "Campus está en prueba. Si algo no cuadra, cuéntanos desde
+Cuenta › Reportar un problema."
+
+### Campus de la UASD
+
+Cuatro tarjetas:
+
+- **"UASD Virtual"**: sus **tareas**, con su fecha de entrega.
+- **"Historial de notas"**: sus notas período por período.
+- **"Calendario académico"**: las fechas del período.
+- **"Programación docente"**: las secciones del próximo período.
+
+Además, en el Horario, cada clase con tareas lleva un chip "Tareas N", y en el
+Pensum las materias dicen "N tareas".
+
+**Tareas (UASD Virtual).**
+
+- Se conecta con **"Conectar UASD Virtual"**: entra con su **ID Banner y su
+  contraseña**, como siempre, en la página de la UASD. Studiante no ve ni
+  guarda su contraseña. Lee sus asignaturas, sus tareas y fechas, lo que ya
+  entregó, cuestionarios, foros y notas de las tareas.
+- Las tareas se ordenan en "Vencidas", "Vence hoy", "Próximos 3 días", "Vence
+  esta semana", "Vence la semana que viene", "Más adelante" y "Sin fecha
+  definida". Las semanas van de lunes a domingo. Arriba hay filtros: "Próximas",
+  "Hechas" y uno por materia.
+- Cada tarea dice si está "Abierta", cuánto le queda ("Quedan 3 h"), y si ya
+  la entregó ("entregada", "respondido", "participaste" o la nota). Tocándola
+  salen las instrucciones, el comentario del profesor y **"Abrir en UASD
+  Virtual"**, que lo lleva directo a la tarea (pide entrar otra vez).
+- **No se actualiza solo del todo**: con **"Actualizar"** se vuelve a leer
+  todo, y hay que entrar otra vez cada vez (por seguridad no queda la sesión
+  abierta). Entre una lectura y otra, la app revisa sola cada pocas horas si
+  hay tareas nuevas o fechas movidas, pero eso no marca nada como hecho.
+- **"Alertas"** (arriba en Tareas): "Avisarme de mis entregas" con cuánto antes
+  ("2 días antes", "1 día antes", "3 horas antes", "1 hora antes") y "Tareas
+  nuevas" cuando un profesor publica algo. Necesitan el permiso de
+  notificaciones.
+- "Sin fecha definida" o "Sin definir": el profesor puso una fecha de relleno;
+  cuando ponga la real, sale al actualizar.
+- Si una tarea falta, que toque "Actualizar". Si el profesor no le puso fecha,
+  la materia sale en "Sin tareas con fecha".
+
+Errores de UASD Virtual que puede ver (todos tienen "Intentar de nuevo"):
+
+- "UASD Virtual pide entrar otra vez para abrir tu siguiente aula (2 de 4
+  listas)." — No es un error: que vuelva a entrar y sigue.
+- "El aula de {facultad} no respondió." — Esa aula de la UASD no contestó en un
+  minuto. Las demás sí se leyeron; "Intentar de nuevo" lee solo las que
+  faltaron. Es de la UASD: que pruebe en un rato.
+- "UASD Virtual tardó demasiado en responder." o "No pudimos abrir UASD
+  Virtual. Revisa tu conexión." — conexión o la UASD lenta: que pruebe con
+  buena señal en un rato.
+- "No vimos asignaturas en tu UASD Virtual para este período." — la UASD no le
+  tiene materias virtuales inscritas este período.
+- "Ya guardamos 2 de tus 4 aulas; vuelve a intentarlo para las demás." — se
+  guardó lo que se pudo leer.
+
+**Historial de notas.** Sale del récord que importó al conectar su universidad:
+cada período con sus materias, notas, el índice del período y el acumulado.
+Sin récord dice "Importa tu récord" con **"Importar mi récord"**. Cuando salen
+notas nuevas, que vuelva a importar ("impórtalo de nuevo").
+
+**Calendario académico.** Las fechas del período que publica la UASD, con
+"AHORA" y "PRÓXIMO". Con la campana de un evento le avisa: "Cuando empieza",
+"Un día antes del último día" y "El último día", a la hora que elija (7:00 a.
+m. si no elige). Si dice "Todavía no hay calendario", la UASD no lo ha
+publicado.
+
+**Programación docente.** Las secciones del **próximo período**: horario,
+profesor, aula, modalidad y **cupos**.
+
+- La primera vez pregunta "¿En qué campus estudias?" (se cambia con
+  "Cambiar"). Si no hay secciones en su campus, "Ver en todos los campus".
+- "Elegir materia a consultar" muestra lo que le falta del pensum y si sus
+  requisitos le dejan tomarla ("Puedes tomarla", "Si apruebas…", "Te
+  falta…"). También se busca por nombre o clave.
+- **Armar su selección**: tocando una sección la agrega. Si choca con otra,
+  avisa ("Esta sección choca"). "Ver tu selección" enseña la semana, los
+  créditos, los choques y las secciones sin cupo, y se puede "Compartir".
+- **Studiante no inscribe materias**: es un plan para organizarse. La
+  inscripción la hace en la UASD, en sus fechas.
+- Los cupos cambian todo el tiempo: deslizar hacia abajo los vuelve a leer.
+- Con **"Compartir con tus amigos"** ve qué secciones eligieron sus amigos que
+  también la comparten ("Ana la eligió"). Viene apagado; se maneja en Amigos →
+  Privacidad → "Tu próxima selección".
+- Si sale "Llegaste al límite de consultas a la programación docente por hoy",
+  que siga mañana.
+- "La UASD no responde ahora mismo" — es de la UASD: que pruebe en un rato.
+
+### Campus de UNAPEC
+
+Seis tarjetas:
+
+- **"Notas en línea"**: las calificaciones de sus materias en curso, a medida
+  que salen.
+- **"Asistencia"**: cuántas veces ha faltado a cada materia y cuántas le
+  quedan.
+- **"Historial de notas"**: igual que en la UASD.
+- **"Cita de selección y pago"**: el día y la hora de su selección y los días
+  de pago.
+- **"Clases del próximo cuatrimestre"**: las secciones del próximo período,
+  con horario, profesor y cupos, y su selección (igual que la programación de
+  la UASD, sin campus). La inscripción la hace en UNAPEC el día de su cita.
+- **"Calendario académico"**: las fechas del período, con alertas.
+
+**Notas y asistencia.** Se traen con **"Traer de UNAPEC"** (la primera vez) o
+**"Actualizar"**: entra con su cuenta de UNAPEC (la de Microsoft), en la página
+de UNAPEC. Studiante no ve ni guarda su contraseña. Lee "Leyendo tus
+calificaciones…", "Leyendo tu asistencia…", "Revisando tu inscripción…" y
+guarda. **No se actualiza sola**: cada vez que quiera ver notas nuevas, que
+toque "Actualizar".
+
+- Cada materia trae "Primer parcial", "Segundo parcial" y "Examen final", el
+  acumulado de 100 y lo que falta por publicar, y le dice cuánto necesita en lo
+  que falta para mantener la letra. Las retiradas salen con "Retirada".
+- "Si sacas todo lo que falta" proyecta el índice del cuatrimestre y si quedaría
+  en condición "Normal" o en "Prueba académica".
+- **Ausencias**: se permiten 3 por cada día de clase a la semana (6 si la
+  materia es dos días). Una más es FN (se reprueba por inasistencia). La app
+  dice "Puedes faltar N veces más", "Llegaste al máximo" o "Pasaste el máximo".
+  Si sale "UNAPEC no tiene asistencia registrada todavía", los profesores no
+  han pasado lista en UNAPEC.
+
+Lo que puede salirle al traer las notas:
+
+- **"UNAPEC no deja ver tus calificaciones todavía"** — no es un error de la
+  app: UNAPEC bloquea las notas mientras tenga algo pendiente: **la evaluación
+  de sus profesores, actualizar su configuración de pagos o la configuración
+  de su próximo período**. Que lo complete en UNAPEC y vuelva a actualizar.
+- "UNAPEC no muestra materias en curso para ti ahora mismo." — UNAPEC no le
+  tiene materias este período.
+- "Se quedó en 'Leyendo tus calificaciones…'…" — UNAPEC no respondió: que lo
+  intente en un rato.
+
+**Cita de selección.** Detecta su carrera; si no, pregunta "¿Cuál es tu
+carrera en UNAPEC?". Si sale "UNAPEC no tiene tu cita ahora mismo", todavía no
+la publican.
+
+### "No pudimos preparar la lectura" y los códigos CS-…
+
+Antes de abrir la página de UASD Virtual o de UNAPEC, la app prepara la
+lectura. Desde el 16 de octubre, el botón dice **"Preparando…"**, lo reintenta
+solo unos segundos, y si no se puede **no abre nada**: sale "No pudimos
+preparar la lectura" con el motivo y un **código** ("Código: CS-AUTH"), y los
+botones "Intentar de nuevo", "Reportar" y "Cerrar". Si reporta, el código
+llega en el mensaje: "(código CS-…)".
+
+| Código | Qué pasó | Qué contestar |
+|---|---|---|
+| CS-NET | El teléfono no llegó a Studiante | Que revise su conexión y vuelva a intentar |
+| CS-AUTH | Su sesión de Studiante no se pudo renovar en ese momento (pasa cuando muchísima gente abre la app a la vez) | Que espere un minuto y toque "Intentar de nuevo". No tiene que cerrar sesión ni borrar nada |
+| CS-VERIFY | No se pudo verificar el teléfono con Apple o Google | Que cierre la app y la abra en un par de minutos. Si sigue igual, pásalo a una persona |
+| CS-OFF | Su pensum activo no es de esa universidad | Que en el Pensum active el de la UASD o UNAPEC ("Cambiar") |
+| CS-LIMIT | Llegó al límite de lecturas del día (o hubo demasiadas peticiones a la vez) | Si dice "por hoy", que siga mañana; si no, en un minuto |
+| CS-SERVER | Studiante tuvo un error de su lado | Que pruebe en un rato. Si sigue más de una hora, pásalo a una persona |
+| CS-OUTDATED | Su app necesita lo último que llegó por dentro | Que cierre la app del todo y la abra otra vez (hasta dos veces) |
+| CS-INCOMPLETE | La lectura llegó a medias | Que vuelva a intentar en un momento |
+| CS-UNKNOWN | Otra cosa | Que vuelva a intentar; si se repite, pásalo a una persona con el código |
+
+**Si dice "No pudimos preparar la lectura de UNAPEC" (o de UASD Virtual) sin
+código**, tiene la app de antes del 16 de octubre. Casi siempre fue la sesión
+que no se pudo renovar en un momento de mucha gente (lo de CS-AUTH): que cierre
+la app del todo, la abra otra vez (así toma la versión con los códigos) y lo
+intente de nuevo. Si vuelve a fallar, ya le sale el código.
+
 ## Perfil vocacional
 
 Cuenta → **"Perfil vocacional"** → "Descubre tu carrera ideal". Son unos 7
@@ -606,7 +928,6 @@ Cómo llega:
   dice la app al terminar de conectar.
 - "Su histórico académico no está disponible debido a retenciones en su
   registro".
-- En versiones viejas: "formulario del kárdex: no apareció tras 4s".
 - O a secas: "mi índice no aparece", "no me salen las materias", "solo me
   cargó el horario", siendo de la UASD o UNICARIBE.
 
@@ -625,6 +946,22 @@ Qué contestar, en corto:
 
 Solo pasa a una persona si insiste en que no tiene ninguna retención y ya
 actualizó y reintentó. Pásala con su universidad y el mensaje exacto.
+
+### "formulario del kárdex: no apareció tras 4s" (UASD)
+
+La página de la UASD tardó más de la cuenta en abrir su récord. Casi siempre es
+un momento lento de la UASD: que lo intente otra vez en un rato. Si le sale
+**siempre**, puede ser una retención: que revise la sección de Retenciones en
+su cuenta de la UASD (ver el caso de arriba). Si no tiene ninguna y le sigue
+saliendo, pásalo a una persona.
+
+### "Le di a horario, cargó y no se puso nada"
+
+Pasaba al traer el horario de su universidad sin tener una carrera de esa
+universidad elegida: se leía pero no se guardaba. Se arregló el 15 de octubre.
+Que lo intente de nuevo (Horario → "Actualizar" → "Directo de mi
+universidad"). Si tampoco, que elija primero su carrera en el Pensum y lo
+vuelva a traer.
 
 ### "Rechazó la conexión (error 403)" (UASD o UNICARIBE)
 
@@ -720,7 +1057,9 @@ Si lo piden, di que por ahora no está, sin prometer fecha, y anótalo como
 feature:
 
 - Poner o corregir notas a mano.
-- Llevar las inasistencias por clase.
+- Llevar las inasistencias por clase a mano. (En UNAPEC las trae sola:
+  Campus → "Asistencia".)
+- Campus para universidades que no son la UASD ni UNAPEC.
 - Ver las horas en formato de 24 horas.
 - Una versión web: la app es solo para iPhone y Android (también iPad y
   tablets). El enlace para instalarla es https://studiante.app/get.
