@@ -751,7 +751,11 @@ Pensum las materias dicen "N tareas".
 - **"Alertas"** (arriba en Tareas): "Avisarme de mis entregas" con cuánto antes
   ("2 días antes", "1 día antes", "3 horas antes", "1 hora antes") y "Tareas
   nuevas" cuando un profesor publica algo. Necesitan el permiso de
-  notificaciones.
+  notificaciones. Desde el 20 de octubre, si una entrega aparece con menos
+  tiempo que el elegido, avisa 3 horas o 1 hora antes, y el aviso dice el
+  momento real: "Vence esta noche… hasta la medianoche" para las que vencen a
+  las 12:00 a. m. Si alguien dice que un aviso le llegó tarde, que actualice la
+  app y abra Campus para que vuelva a leer sus tareas.
 - "Sin fecha definida" o "Sin definir": el profesor puso una fecha de relleno;
   cuando ponga la real, sale al actualizar.
 - Si una tarea falta, que toque "Actualizar". Si el profesor no le puso fecha,
