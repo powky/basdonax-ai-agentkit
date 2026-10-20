@@ -18,7 +18,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from agente.config import RAIZ, Config  # noqa: E402
-from agente.web.webhook import crear_app, firma_valida  # noqa: E402
+from agente.web.webhook import TaparToken, crear_app, firma_valida, tapar_token_en_logs  # noqa: E402
 
 SECRETO = "secreto-de-chatwoot"
 TOKEN = "token-de-la-url"
@@ -387,3 +387,54 @@ def test_canales_del_entorno(valor, esperado):
     from agente.config import _canales
 
     assert _canales(valor) == esperado
+
+
+def _linea_de_acceso(ruta):
+    """Un registro como el que arma uvicorn para cada pedido."""
+    import logging
+
+    return logging.LogRecord(
+        "uvicorn.access", logging.INFO, __file__, 1, '%s - "%s %s HTTP/%s" %d',
+        ("10.0.2.6:35008", "POST", ruta, "1.1", 200), None,
+    )
+
+
+@pytest.mark.parametrize(
+    "ruta, queda",
+    [
+        (f"/chatwoot/{TOKEN}", "/chatwoot/<token>"),
+        (f"/chatwoot/{TOKEN}?x=1", "/chatwoot/<token>?x=1"),
+        ("/chatwoot/otro-token-cualquiera", "/chatwoot/<token>"),
+        ("/salud", "/salud"),
+    ],
+)
+def test_el_log_de_acceso_no_muestra_el_token(ruta, queda):
+    registro = _linea_de_acceso(ruta)
+    assert TaparToken().filter(registro) is True  # tapa, no descarta
+    assert registro.args[2] == queda
+    assert TOKEN not in registro.getMessage()
+
+
+def test_el_token_no_sale_por_el_log_que_arma_uvicorn():
+    """De punta a punta con la configuración real de uvicorn: su formato de
+    acceso, después de que la Config arma sus loggers."""
+    import logging
+
+    import uvicorn
+
+    uvicorn.Config(lambda *a: None, log_level="info")  # arma los loggers de uvicorn
+    acceso = logging.getLogger("uvicorn.access")
+    antes = list(acceso.filters)
+    try:
+        tapar_token_en_logs()
+        tapar_token_en_logs()  # dos veces: un solo filtro
+        assert sum(isinstance(f, TaparToken) for f in acceso.filters) == 1
+
+        registro = _linea_de_acceso(f"/chatwoot/{TOKEN}")
+        assert acceso.filter(registro)
+        linea = acceso.handlers[0].format(registro)
+        assert TOKEN not in linea
+        assert '"POST /chatwoot/<token> HTTP/1.1" 200' in linea
+    finally:
+        acceso.filters[:] = antes
+

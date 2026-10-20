@@ -38,7 +38,7 @@ import logging  # noqa: E402
 import uvicorn  # noqa: E402
 
 from agente import Config, ErrorDeConfiguracion  # noqa: E402
-from agente.web.webhook import crear_app  # noqa: E402
+from agente.web.webhook import crear_app, tapar_token_en_logs  # noqa: E402
 
 AMBAR = "\033[38;5;214m"
 GRIS = "\033[90m"
@@ -69,7 +69,11 @@ def main() -> int:
 
     # host 0.0.0.0 porque adentro de un contenedor, escuchar solo en
     # localhost es escuchar en un lugar al que nadie puede entrar.
-    uvicorn.run(app, host="0.0.0.0", port=puerto, log_level="info")
+    servidor = uvicorn.Config(app, host="0.0.0.0", port=puerto, log_level="info")
+    # Después de la Config, que es la que arma los loggers de uvicorn: su log
+    # de acceso escribe la URL entera, y la URL lleva el token del webhook.
+    tapar_token_en_logs()
+    uvicorn.Server(servidor).run()
     return 0
 
 

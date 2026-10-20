@@ -32,6 +32,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
@@ -50,6 +51,46 @@ from ..mcp import catalogo_caido
 from .. import traspaso
 
 registro = logging.getLogger("agente.webhook")
+
+# La ruta del webhook con su token, tal como la escribe uvicorn. Se tapa el
+# segmento entero, sea o no el token bueno: un intento con uno casi igual
+# tampoco tiene por qué quedar escrito.
+_RUTA_CON_TOKEN = re.compile(r"^(/chatwoot/)[^/?#]+")
+
+
+class TaparToken(logging.Filter):
+    """Tapa el token del webhook en el log de acceso de uvicorn.
+
+    El token va en la URL porque Chatwoot no firma sus webhooks: es la única
+    llave de la puerta. Y uvicorn escribe la ruta entera en cada línea de
+    acceso (`"POST /chatwoot/<el token> HTTP/1.1" 200`), así que sin esto el
+    secreto queda a la vista de cualquiera que lea los logs del panel.
+
+    uvicorn arma esa línea con los `args` del registro (cliente, método, ruta,
+    versión, estado), no con el mensaje ya armado: por eso la ruta se cambia
+    adentro de `args`.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if isinstance(args, tuple) and len(args) >= 3 and isinstance(args[2], str):
+            ruta = _RUTA_CON_TOKEN.sub(r"\1<token>", args[2])
+            if ruta != args[2]:
+                record.args = (*args[:2], ruta, *args[3:])
+        # Tapa, no descarta: la línea sigue sirviendo para ver que el mensaje
+        # llegó y con qué estado.
+        return True
+
+
+def tapar_token_en_logs() -> None:
+    """Le pone TaparToken al log de acceso de uvicorn, una sola vez.
+
+    Va después de crear la `uvicorn.Config`, que es la que arma los loggers de
+    uvicorn.
+    """
+    acceso = logging.getLogger("uvicorn.access")
+    if not any(isinstance(f, TaparToken) for f in acceso.filters):
+        acceso.addFilter(TaparToken())
 
 
 # Cuánto se acepta de desfase entre el reloj de Chatwoot y el nuestro. Sin este
