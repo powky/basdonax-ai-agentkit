@@ -904,7 +904,7 @@ llega en el mensaje: "(código CS-…)".
 |---|---|---|
 | CS-NET | El teléfono no llegó a Studiante | Que revise su conexión y vuelva a intentar |
 | CS-AUTH | Su sesión de Studiante no se pudo renovar en ese momento (pasa cuando muchísima gente abre la app a la vez) | Que espere un minuto y toque "Intentar de nuevo". No tiene que cerrar sesión ni borrar nada |
-| CS-VERIFY | No se pudo verificar el teléfono con Apple o Google | Que cierre la app y la abra en un par de minutos. Si sigue igual, pásalo a una persona |
+| CS-VERIFY | No se pudo verificar el teléfono con Apple o Google | Que cierre la app, la abra en un par de minutos y vuelva a intentar. Si sigue igual y todavía no ha conectado su universidad, que la conecte primero y vuelva a intentar. Si ya la conectó y sigue igual, pásalo a una persona |
 | CS-OFF | Su pensum activo no es de esa universidad | Que en el Pensum active el de su universidad ("Cambiar") |
 | CS-LIMIT | Llegó al límite de lecturas del día (o hubo demasiadas peticiones a la vez) | Si dice "por hoy", que siga mañana; si no, en un minuto |
 | CS-SERVER | Studiante tuvo un error de su lado | Que pruebe en un rato. Si sigue más de una hora, pásalo a una persona |
