@@ -190,7 +190,10 @@ con "Elegir este pensum".
 
 **Cómo se nota que eligió el plan equivocado:** al conectar su universidad le
 sale "N materias de tu récord no están en este pensum." y el pensum queda a
-medio marcar, con materias que dio sin marcar.
+medio marcar, con materias que dio sin marcar. Desde el 20 de octubre, si son
+8 o más, le sale **"Tu plan parece otro"** con dos botones: **"Buscar mi
+plan"**, que lleva a agregar pensum, y **"Avisar que falta"**, que abre
+WhatsApp con el mensaje armado.
 
 **Cómo se cambia** (no pierde nada):
 
@@ -201,6 +204,12 @@ medio marcar, con materias que dio sin marcar.
 3. En "Mis pensums", "Editar" → el zafacón en el equivocado, para quitarlo.
 4. Que vuelva a conectar su universidad (**"Actualizar"** en el Pensum): el
    plan correcto se marca solo.
+
+**Si su plan no está en la lista.** Pasa cuando entró antes de que su
+universidad cambiara el plan y sigue en el anterior (por ejemplo, Mercadeo de
+UNICARIBE antes de 2024). Su índice está bien: es el que publica su
+universidad. Lo que no cuadra es el pensum. Pídele el pensum de su plan en PDF
+o en foto y pásalo a una persona para agregarlo.
 
 Si los dos planes tienen el **mismo código**, la app pregunta "¿Cambiar de
 plan?" y el progreso se conserva. Si tienen códigos distintos, se agrega aparte
@@ -956,6 +965,10 @@ correo). Reconócelos:
   faltante del prompt.
 - **"Encontré un error en un pensum de Studiante"** — reclamo de datos: se pasa
   a una persona.
+- **"Hola 👋 Mi plan no está en Studiante."** — viene de "Tu plan parece
+  otro": trae su universidad, su carrera y las materias de su récord que no
+  están en el pensum. Pídele el pensum de su plan en PDF o en foto y pásalo a
+  una persona.
 - **"Hola 👋 Creo que hay un dato mal en mis honores en Studiante."** — viene
   de la pantalla de honores. Trae "Lo que veo mal" (lo que escribió la persona)
   y "Lo que dice la app" (universidad, índice, el resultado y las reprobadas).
