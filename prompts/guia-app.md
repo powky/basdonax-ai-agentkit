@@ -1,7 +1,7 @@
 # Cómo se usa la app
 
 Este es el manual de la versión **2.3.0**, la que está en las tiendas, con lo
-que le ha llegado por dentro hasta el **16 de octubre** (Campus, entre otras
+que le ha llegado por dentro hasta el **19 de octubre** (Campus, entre otras
 cosas). Úsalo
 cuando alguien está perdido y hay que guiarlo, o cuando reporta algo que parece
 un fallo. No lo recites: dale **solo el pedazo que necesita**, en pasos cortos,
@@ -27,8 +27,8 @@ pantalla: úsalos tal cual para que los reconozca.
   de esta guía no le sale teniendo la 2.3.0, lo primero es eso: cerrarla del
   todo y abrirla otra vez (a veces hacen falta dos veces).
 - Lo que llegó así después del 10 de octubre:
-  - **Campus** (ver su sección): para la UASD desde el 12 de octubre y para
-    UNAPEC desde el 14.
+  - **Campus** (ver su sección): para la UASD desde el 12 de octubre, para
+    UNAPEC desde el 14 y para UTESA desde el 18.
   - **UTECO** con sincronización: récord e índice desde el 12 de octubre, y el
     horario desde el 13.
   - Honores de **O&M** solo por índice (12 de octubre).
@@ -36,6 +36,10 @@ pantalla: úsalos tal cual para que los reconozca.
   - El **calendario del teléfono** que para cuando termina el ciclo (15 de
     octubre).
   - Los **códigos de error** de Campus (16 de octubre).
+  - Las **estrellas** de la UNPHU desde 90 (18 de octubre).
+  - El **avance** ya no vuelve atrás: un cambio viejo del teléfono no pisa lo
+    que llegó después de su universidad o de otro teléfono (18 de octubre).
+  - El **calendario académico** de UTESA en Campus (18 de octubre).
 
 ## Cómo está organizada
 
@@ -334,8 +338,8 @@ reprobó), abajo está **"¿Algún dato está mal?"** → "Avisar por WhatsApp",
 manda el mensaje armado con todo (ver "Mensajes que llegan armados").
 
 **Estrellas.** Una estrella es una materia aprobada con la nota más alta que
-puede dar su universidad: **95 o más** si la nota viene en número, o la letra
-más alta (A+, o A donde la escala termina en A). Las notas de 90 en adelante se
+puede dar su universidad: **95 o más** si la nota viene en número (en la
+UNPHU, **90 o más**: su A va de 90 a 100), o la letra más alta (A+, o A donde la escala termina en A). Las notas de 90 en adelante se
 ven doradas. Para tener estrellas hace falta la **nota**, que solo llega con la
 sincronización. Una materia marcada a mano, o que llegó como "AP", no tiene nota
 y no puede tener estrella.
@@ -676,26 +680,31 @@ Cuando el plan termina deja de salir en las materias y el sello se quita.
 Pasa a una persona todo lo que sea **cobros, reembolsos o un perfil "En
 revisión"**: tú no puedes ver los pagos.
 
-## Campus (UASD y UNAPEC)
+## Campus (UASD, UNAPEC y UTESA)
 
 Es la pestaña **"Campus"**, entre Pensum y Cuenta: "Lo que tu universidad tiene
 en línea, traído a Studiante." Llegó por dentro, sin pasar por la tienda: para
-la UASD el 12 de octubre y para UNAPEC el 14.
+la UASD el 12 de octubre, para UNAPEC el 14 y para UTESA el 18.
 
-**Quién la ve.** Todo el que tiene como **pensum activo** uno de la **UASD** o
-de **UNAPEC**. Nadie más: las otras universidades todavía no tienen Campus (si
-lo pide, anótalo como feature con su universidad). Un estudiante de la UASD ve
-solo lo de la UASD, y uno de UNAPEC solo lo de UNAPEC.
+**Quién la ve.** Todo el que tiene como **pensum activo** uno de la **UASD**, de
+**UNAPEC** o de **UTESA**. Nadie más: las otras universidades todavía no tienen
+Campus (si lo pide, anótalo como feature con su universidad). Cada quien ve
+solo lo de su universidad.
 
 **"No me sale Campus."** En este orden:
 
-1. Que su pensum **activo** sea de la UASD o de UNAPEC (en la pestaña Pensum,
-   "Cambiar" → el que está marcado). Si tiene dos carreras, Campus sigue a la
-   activa.
+1. Que su pensum **activo** sea de la UASD, de UNAPEC o de UTESA (en la pestaña
+   Pensum, "Cambiar" → el que está marcado). Si tiene dos carreras, Campus
+   sigue a la activa.
 2. Que cierre la app del todo y la abra otra vez, hasta dos veces: Campus llega
    por dentro.
-3. Que tenga la 2.3.0. Si no, que actualice.
+3. Que tenga la 2.3.0. Si tiene la 2.2 o una anterior, que actualice desde App
+   Store o Google Play: lo que llega por dentro solo le llega a la 2.3.0.
 4. Si con todo eso no le sale, pásalo a una persona.
+
+**"Me sale Campus pero no mis tareas"** (UASD o UTESA): las tareas no llegan
+solas la primera vez. Que toque la tarjeta de su aula ("UASD Virtual" o "Nube
+UTESA") y después "Conectar UASD Virtual" o "Conectar Nube UTESA".
 
 Abajo de Campus dice "Campus está en prueba. Si algo no cuadra, cuéntanos desde
 Cuenta › Reportar un problema."
@@ -835,10 +844,57 @@ Lo que puede salirle al traer las notas:
 carrera en UNAPEC?". Si sale "UNAPEC no tiene tu cita ahora mismo", todavía no
 la publican.
 
+**Calendario académico.** UNAPEC lo publica **semana a semana**: la app lo lee
+cada día y va sumando las semanas. Lo que dura varios días (un retiro o una
+solicitud "hasta el …") sale desde ya con su fecha final. Lo que cae en un día
+más adelante (exámenes, asuetos) sale cuando UNAPEC publica esa semana. Por eso
+no están las fechas de septiembre ni de principios de octubre: no es un error.
+
+### Campus de UTESA
+
+Dos tarjetas:
+
+- **"Nube UTESA"**: sus **tareas** de la Nube de UTESA, con su fecha de entrega.
+- **"Calendario académico"**: las fechas del cuatrimestre.
+
+**Tareas (Nube UTESA).** Funcionan como las de la UASD (ver "Campus de la
+UASD"): los mismos grupos por fecha, los filtros, las "Alertas", "Actualizar"
+y los chips de tareas en el Horario y el Pensum. Lo que cambia:
+
+- Se conecta con **"Conectar Nube UTESA"**: "Elige tu recinto y entra con tu
+  matrícula y tu contraseña de UTESA, como siempre", en la página de UTESA. La
+  Nube es una sola para todos los recintos. Studiante no ve ni guarda su
+  contraseña.
+- Lee sus cursos en curso, las tareas y sus fechas, lo que ya entregó, los
+  foros (comentar el debate de un compañero también cuenta como participar),
+  los cuestionarios y las tareas que el profesor calificó sin pedir entrega
+  ("Calificada …").
+- Si actualiza poco después de entrar, entra directo sin pedir la contraseña:
+  la sesión de la Nube sigue abierta un rato en ese teléfono. Cuando UTESA la
+  cierra, pide entrar otra vez. Si en el mismo teléfono se usa otra cuenta de
+  Studiante, a esa sí le pide entrar.
+- "Abrir en Nube UTESA" lo lleva directo a la tarea (si hace falta, pide elegir
+  el recinto y entrar).
+
+Errores de la Nube que puede ver:
+
+- "Nube UTESA tardó demasiado en responder." o "No pudimos abrir Nube UTESA.
+  Revisa tu conexión." — conexión o la Nube lenta: que pruebe con buena señal
+  en un rato.
+- "No pudimos leer tu Nube UTESA." o "Nube UTESA se cerró de golpe." — que
+  vuelva a intentar. Si se repite, pásalo a una persona.
+- "No encontramos esa tarea en tu Nube UTESA." — el profesor la quitó o la
+  cambió: que toque "Actualizar".
+- "Nube UTESA no nos dejó abrir la tarea." — que la abra desde la Nube.
+
+**Calendario académico.** Las fechas del cuatrimestre que publica UTESA (el
+mismo calendario para todos los recintos), con "AHORA", "PRÓXIMO" y las mismas
+alertas que el de la UASD.
+
 ### "No pudimos preparar la lectura" y los códigos CS-…
 
-Antes de abrir la página de UASD Virtual o de UNAPEC, la app prepara la
-lectura. Desde el 16 de octubre, el botón dice **"Preparando…"**, lo reintenta
+Antes de abrir la página de UASD Virtual, de UNAPEC o de la Nube UTESA, la app
+prepara la lectura. Desde el 16 de octubre, el botón dice **"Preparando…"**, lo reintenta
 solo unos segundos, y si no se puede **no abre nada**: sale "No pudimos
 preparar la lectura" con el motivo y un **código** ("Código: CS-AUTH"), y los
 botones "Intentar de nuevo", "Reportar" y "Cerrar". Si reporta, el código
@@ -849,7 +905,7 @@ llega en el mensaje: "(código CS-…)".
 | CS-NET | El teléfono no llegó a Studiante | Que revise su conexión y vuelva a intentar |
 | CS-AUTH | Su sesión de Studiante no se pudo renovar en ese momento (pasa cuando muchísima gente abre la app a la vez) | Que espere un minuto y toque "Intentar de nuevo". No tiene que cerrar sesión ni borrar nada |
 | CS-VERIFY | No se pudo verificar el teléfono con Apple o Google | Que cierre la app y la abra en un par de minutos. Si sigue igual, pásalo a una persona |
-| CS-OFF | Su pensum activo no es de esa universidad | Que en el Pensum active el de la UASD o UNAPEC ("Cambiar") |
+| CS-OFF | Su pensum activo no es de esa universidad | Que en el Pensum active el de su universidad ("Cambiar") |
 | CS-LIMIT | Llegó al límite de lecturas del día (o hubo demasiadas peticiones a la vez) | Si dice "por hoy", que siga mañana; si no, en un minuto |
 | CS-SERVER | Studiante tuvo un error de su lado | Que pruebe en un rato. Si sigue más de una hora, pásalo a una persona |
 | CS-OUTDATED | Su app necesita lo último que llegó por dentro | Que cierre la app del todo y la abra otra vez (hasta dos veces) |
@@ -1059,7 +1115,7 @@ feature:
 - Poner o corregir notas a mano.
 - Llevar las inasistencias por clase a mano. (En UNAPEC las trae sola:
   Campus → "Asistencia".)
-- Campus para universidades que no son la UASD ni UNAPEC.
+- Campus para universidades que no son la UASD, UNAPEC ni UTESA.
 - Ver las horas en formato de 24 horas.
 - Una versión web: la app es solo para iPhone y Android (también iPad y
   tablets). El enlace para instalarla es https://studiante.app/get.

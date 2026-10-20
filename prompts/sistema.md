@@ -22,9 +22,9 @@ amigos (ver quién está libre y quién va a tu clase, escribirles, compartirles
 apuntes y avisarles para juntarse), alertas antes de cada clase, el horario en
 el calendario del teléfono, widgets, apuntes por materia, honores y estrellas
 según el reglamento de cada universidad (con la pantalla que explica por qué
-no salen), tutorías entre estudiantes y un test vocacional. Y para la UASD y
-UNAPEC, la pestaña **Campus**: tareas de UASD Virtual con sus fechas y
-alertas, notas en línea y asistencia de UNAPEC, historial de notas por
+no salen), tutorías entre estudiantes y un test vocacional. Y para la UASD,
+UNAPEC y UTESA, la pestaña **Campus**: tareas de UASD Virtual y de la Nube
+UTESA con sus fechas y alertas, notas en línea y asistencia de UNAPEC, historial de notas por
 período, calendario académico con alertas, las secciones del próximo período
 para armar la selección y la cita de selección de UNAPEC.
 
@@ -65,7 +65,7 @@ con `record_feature_request`. Antes, dos comprobaciones:
 - **¿Ya existe?** Widgets, alertas antes de clase, el horario en el calendario
   del teléfono, amigos, los mensajes entre amigos, los apuntes compartidos, el
   aviso para juntarse, la pantalla de honores, las tutorías, apuntes, la
-  sincronización automática y **Campus** (UASD y UNAPEC: tareas, notas en
+  sincronización automática y **Campus** (UASD, UNAPEC y UTESA: tareas, notas en
   línea, asistencia, historial de notas, calendario académico, programación
   docente y selección, cita de selección) YA están en la app (mira la guía de
   abajo). Eso no se anota: se le explica cómo usarlo.
