@@ -40,6 +40,10 @@ pantalla: úsalos tal cual para que los reconozca.
   - El **avance** ya no vuelve atrás: un cambio viejo del teléfono no pisa lo
     que llegó después de su universidad o de otro teléfono (18 de octubre).
   - El **calendario académico** de UTESA en Campus (18 de octubre).
+  - Del 20 de octubre: **"Tu plan parece otro"** (contando solo las materias
+    de los últimos 3 años), los avisos de respaldo de las entregas de Campus,
+    el **ITLA** con varios programas, el aviso de la **evaluación docente** en
+    INTEC, PUCMM, IEESL y UCNE, y **"Tu sesión se cerró"** al conectar.
 
 ## Cómo está organizada
 
@@ -190,10 +194,15 @@ con "Elegir este pensum".
 
 **Cómo se nota que eligió el plan equivocado:** al conectar su universidad le
 sale "N materias de tu récord no están en este pensum." y el pensum queda a
-medio marcar, con materias que dio sin marcar. Desde el 20 de octubre, si son
-8 o más, le sale **"Tu plan parece otro"** con dos botones: **"Buscar mi
-plan"**, que lleva a agregar pensum, y **"Avisar que falta"**, que abre
+medio marcar, con materias que dio sin marcar. Si 8 o más de esas son **de los
+últimos 3 años**, le sale **"Tu plan parece otro"** con dos botones: **"Buscar
+mi plan"**, que lleva a agregar pensum, y **"Avisar que falta"**, que abre
 WhatsApp con el mensaje armado.
+
+Las de hace más de 3 años no cuentan para esa tarjeta: suelen ser de otra
+carrera o de un plan anterior, y no van en el plan de ahora. A quien las tiene,
+la app le dice "Si alguna es de una carrera anterior y no va en este plan,
+déjala así." No tiene que hacer nada con ellas.
 
 **Cómo se cambia** (no pierde nada):
 
@@ -1048,6 +1057,14 @@ no deja ver el historial hasta que evalúe a sus profesores. Que la complete en
 UNIBE y vuelva a conectar. Si dice que **el servidor de UNIBE respondió con un
 error**, es de UNIBE: que lo intente de nuevo en un rato.
 
+### La evaluación docente en INTEC, PUCMM, IEESL y UCNE
+
+Si al terminar le sale "[universidad] te pidió llenar la evaluación docente
+antes de ver tus calificaciones, así que tu índice no se actualizó esta vez",
+su universidad tapa las calificaciones hasta que evalúe a sus profesores. Lo
+demás sí se guardó: solo el índice espera. Que complete la evaluación en su
+universidad y vuelva a actualizar.
+
 ### UTESA: materias aprobadas sin nota, y las estrellas
 
 UTESA solo publica las notas **del cuatrimestre en curso**. Las materias
@@ -1086,6 +1103,15 @@ Su universidad sí respondió. Lo que falló fue la conexión del teléfono con
 Studiante en ese momento. Que lo intente otra vez con buena señal o WiFi. Si le
 vuelve a pasar con buena conexión, pásalo a una persona con la universidad y el
 mensaje exacto.
+
+### "Tu sesión se cerró" (antes salía "missing bearer token")
+
+Su sesión de Studiante se cerró mientras conectaba su universidad: cerró
+sesión, o se le venció. Que vuelva a entrar **con la misma cuenta de siempre**
+y conecte otra vez. Si entra con otro correo (por ejemplo, con Google en vez
+del correo de la universidad), se le crea una cuenta nueva y vacía. Si ya le
+pasó, que se quede con una y borre la otra desde Configuración › Eliminar
+cuenta, entrando en la que quiere borrar.
 
 ### Cualquier otro error al conectar
 
