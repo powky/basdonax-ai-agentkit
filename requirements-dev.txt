@@ -2,4 +2,4 @@
 #   pip install -r requirements-dev.txt
 #   pytest
 -r requirements.txt
-pytest>=8.4.2,<9
+pytest>=9.1.1,<10   # la 8.x tiene CVE-2025-71176 (arreglado en la 9.0.3)
