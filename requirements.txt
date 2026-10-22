@@ -50,3 +50,4 @@ langchain-mcp-adapters>=0.3.2,<0.4
 mcp>=1.30.0,<2      # CVE-2026-59951: el servidor HTTP no liberaba las sesiones
 pyjwt>=2.15.0,<3    # una docena de avisos de la 2.13 (confusión de algoritmos, ReDoS)
 urllib3>=2.8.0,<3   # descompresión sin tope al leer en streaming; TLS del proxy
+certifi>=2026.10.19 # GHSA-6q48-6c7w-9gw2: raíz emSign con intermedias de eMudhra comprometidas
