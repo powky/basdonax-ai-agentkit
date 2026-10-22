@@ -11,7 +11,10 @@
 # Toda la configuración entra por variables de entorno. El .env no se copia
 # acá adentro: en el servidor las variables las pone Coolify.
 
-FROM python:3.13-slim
+# Versión exacta y no `3.13-slim`: Coolify construye sin --pull, así que con
+# la etiqueta suelta podía seguir usando una base vieja de su caché. La 3.13.17
+# (21/10/2026) trae el pip con el certifi que ya no confía en las CA de eMudhra.
+FROM python:3.13.17-slim
 
 # Sin esto, Python se guarda los logs en un buffer y en el panel del servidor
 # no ves nada hasta que el proceso muere. Con un servidor que corre para
@@ -31,8 +34,13 @@ WORKDIR /app
 # atiende bien, y el panel igual lo marca *unhealthy* y lo da de baja. El log
 # que deja es "New container is not healthy, rolling back": no dice que falte
 # curl, y se pierde un rato largo buscando el error en otro lado.
+#
+# ca-certificates va con nombre para que se instale la última del repo de
+# Debian: el cliente de Chatwoot usa urllib, que confía en el almacén del
+# sistema y no en certifi. La de octubre de 2026 (DSA-6572-1) saca las CA de
+# eMudhra, cuyos intermedios tenían las llaves comprometidas.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Las dependencias primero y el código después: así, mientras no toques los
