@@ -101,3 +101,15 @@ def test_el_contexto_cuenta_lo_ultimo_que_se_hablo():
 
 def test_sin_mensajes_no_hay_contexto():
     assert contexto_de_la_vuelta([]) == ""
+
+
+def test_desde_que_el_bot_marca_lo_que_sale_sin_marca_es_de_ian():
+    from agente.vuelta import MARCAS_DESDE
+
+    despues = sale(MARCAS_DESDE + 60, "hola, soy Ian")
+    despues["sender"] = {"id": 1, "type": "user"}
+    assert ultima_respuesta_de_ian([entra(MARCAS_DESDE, "hola"), despues]) == MARCAS_DESDE + 60
+
+    antes = sale(MARCAS_DESDE - 60, "esto lo decía la etiqueta")
+    antes["sender"] = {"id": 1, "type": "user"}
+    assert ultima_respuesta_de_ian([antes]) is None

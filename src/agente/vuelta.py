@@ -33,6 +33,12 @@ ENTRANTE, SALIENTE, ACTIVIDAD = 0, 1, 2
 MARCA_BOT = "studiante_bot"
 MARCA_IAN = "studiante_ian"
 
+# Desde acá el bot marca todo lo que manda (3275b07, arriba a las 22:28 UTC del
+# 15/11): lo que un usuario manda sin marca es de Ian —desde la bandeja, el
+# teléfono o donde sea—, con la etiqueta puesta o no. Antes, solo la etiqueta
+# lo dice. Es el mismo momento que MarksSince en el API.
+MARCAS_DESDE = 1794781800  # 2026-11-15T22:30:00Z
+
 
 def _atributo(mensaje: dict, clave: str):
     crudo = mensaje.get("content_attributes")
@@ -89,9 +95,12 @@ def autores(mensajes: list[dict], etiqueta: str = "humano") -> list[tuple[str, d
         if tipo == ENTRANTE:
             salida.append(("persona", m))
         elif tipo == SALIENTE:
+            de_un_usuario = (m.get("sender") or {}).get("type") == "user"
             if _atributo(m, MARCA_BOT):
                 quien = "bot"
             elif _atributo(m, MARCA_IAN) or puesta:
+                quien = "ian"
+            elif (m.get("created_at") or 0) >= MARCAS_DESDE and de_un_usuario:
                 quien = "ian"
             else:
                 quien = "bot"
