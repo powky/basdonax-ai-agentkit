@@ -529,3 +529,81 @@ def test_el_salud_contesta():
 
     assert respuesta.status_code == 200
     assert respuesta.json()["estado"] == "ok"
+
+
+# -- Lo nuevo del 15/11: la marca, la vuelta y los adjuntos --------------------
+
+
+def test_lo_que_manda_el_bot_va_marcado():
+    """Sin la marca, el admin no distingue al bot de Ian: escriben con el mismo usuario."""
+    canal = ChatwootFalso()
+
+    canal.enviar("12", ["hola"])
+    canal.pasar_a_una_persona("12", "motivo")
+
+    mensajes = [l["datos"] for l in canal.llamadas if l["camino"].endswith("/messages")]
+    assert all(m["content_attributes"] == {"studiante_bot": True} for m in mensajes)
+
+
+def test_calla_por_la_etiqueta_solo_si_es_lo_unico():
+    canal = ChatwootFalso()
+    con_etiqueta = canal.traducir(evento(etiquetas=["humano"]))
+    assert canal.calla_por_la_etiqueta(con_etiqueta) is True
+    assert canal.calla_por_la_etiqueta(canal.traducir(evento())) is False
+    assert canal.calla_por_la_etiqueta(canal.traducir(evento(etiquetas=["humano"], privado=True))) is False
+    canal.marcar_atendido(con_etiqueta)
+    assert canal.calla_por_la_etiqueta(con_etiqueta) is False, "un reintento no vuelve a pedir la vuelta"
+
+
+def test_la_vuelta_quita_solo_la_etiqueta_del_traspaso_y_deja_nota():
+    canal = ChatwootFalso(etiquetas_remotas=["pensum-faltante", "humano"])
+
+    assert canal.devolver_al_bot("12", "nota") is True
+
+    puesta = [l for l in canal.llamadas if l["camino"].endswith("/labels") and l["metodo"] == "POST"]
+    assert puesta[0]["datos"]["labels"] == ["pensum-faltante"]
+    nota = [l["datos"] for l in canal.llamadas if l["camino"].endswith("/messages")][0]
+    assert nota["private"] is True and nota["content"] == "nota"
+
+
+def test_la_vuelta_sin_la_etiqueta_no_hace_nada():
+    canal = ChatwootFalso(etiquetas_remotas=["portal"])
+
+    assert canal.devolver_al_bot("12", "nota") is False
+    assert not [l for l in canal.llamadas if l["metodo"] == "POST"]
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://chatwoot.ejemplo.com/rails/blob/a.pdf",
+        "https://otro.ejemplo.com/a.pdf",
+        "https://chatwoot.ejemplo.com.malo.com/a.pdf",
+    ],
+)
+def test_solo_baja_archivos_de_la_bandeja(url):
+    from agente.canales.chatwoot import ErrorDeChatwoot
+
+    with pytest.raises(ErrorDeChatwoot):
+        ChatwootFalso().descargar(url, 1024)
+
+
+def test_el_buffer_espera_la_lectura_en_su_lugar():
+    """Una foto que se está leyendo no se adelanta ni se queda afuera."""
+    sueltos = []
+
+    async def correr():
+        buffer = BufferDeMensajes(0.05, lambda c, t: _anotar(sueltos, c, t))
+
+        async def leer():
+            await asyncio.sleep(0.1)  # más que la espera del buffer
+            return "[la persona mandó una foto. Lo que muestra: un error]"
+
+        await buffer.agregar("12", "mira esto")
+        await buffer.agregar("12", asyncio.create_task(leer()))
+        await buffer.agregar("12", "qué hago?")
+        await asyncio.sleep(0.4)
+
+    asyncio.run(correr())
+
+    assert sueltos == [("12", "mira esto\n[la persona mandó una foto. Lo que muestra: un error]\nqué hago?")]

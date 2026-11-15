@@ -41,13 +41,16 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from ..agente import Agente
+from ..ajustes_soporte import AjustesDelSoporte
 from ..canales.buffer import BufferDeMensajes
 from langchain_core.tools import StructuredTool
 
 from ..canales.chatwoot import Chatwoot
 from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
+from ..lector import LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
 from ..mcp import catalogo_caido
+from ..vuelta import contexto_de_la_vuelta, ultima_respuesta_de_ian
 from .. import traspaso
 
 registro = logging.getLogger("agente.webhook")
@@ -93,6 +96,16 @@ def tapar_token_en_logs() -> None:
         acceso.addFilter(TaparToken())
 
 
+# La nota que queda en la bandeja cuando una conversación vuelve al bot.
+NOTA_DE_LA_VUELTA = (
+    "Volvió a escribir más de 24 horas después de tu última respuesta: la "
+    "retoma el bot. Si no la resuelve, te la vuelve a pasar."
+)
+
+# Cuánto dura "la retomó recién": los demás mensajes de la misma ráfaga ya no
+# vuelven a pedir el historial ni a dejar otra nota.
+RETOMADA_RECIEN = 600
+
 # Cuánto se acepta de desfase entre el reloj de Chatwoot y el nuestro. Sin este
 # tope, un pedido firmado interceptado hoy sirve para siempre.
 TOLERANCIA_FIRMA = 300
@@ -128,11 +141,14 @@ def crear_app(
     config: Config | None = None,
     agente: Agente | None = None,
     canal: Chatwoot | None = None,
+    lector: LectorDeAdjuntos | None = None,
+    ajustes: AjustesDelSoporte | None = None,
 ) -> FastAPI:
     """Arma el servidor.
 
-    El agente y el canal se pueden pasar armados: es lo que hacen los tests
-    para probar todo esto sin salir a internet ni gastar un token.
+    El agente, el canal, el lector de adjuntos y los ajustes se pueden pasar
+    armados: es lo que hacen los tests para probar todo esto sin salir a
+    internet ni gastar un token.
     """
     config = config or Config.desde_entorno()
 
@@ -142,6 +158,22 @@ def crear_app(
         cuenta_id=config.chatwoot_cuenta_id,
         etiqueta_humano=config.chatwoot_etiqueta_humano,
     )
+
+    # Los interruptores del admin (leer adjuntos, volver al bot a las 24 h).
+    ajustes = ajustes or AjustesDelSoporte(
+        config.studiante_api_url, config.studiante_soporte_llave
+    )
+
+    # El lector de adjuntos solo existe con Gemini, que lee fotos, PDF y
+    # audio. Con otro proveedor los archivos siguen pasando a una persona.
+    if lector is None and config.proveedor == "gemini" and hasattr(canal, "descargar"):
+        from ..modelos import crear_modelo
+
+        lector = LectorDeAdjuntos(
+            crear_modelo("gemini", config.api_key, config.modelo_lector, 2048),
+            canal.descargar,
+            config.prompt_lector,
+        )
 
     def guardar_nombre(nombre: str) -> str:
         """Guarda el nombre de la persona en el contacto de Chatwoot."""
@@ -313,6 +345,126 @@ def crear_app(
 
     buffer = BufferDeMensajes(config.buffer_segundos, responder)
 
+    # Las conversaciones que el bot retomó hace un rato, y cuándo.
+    retomadas: dict[str, float] = {}
+
+    def _fuera_de_los_canales(entrante) -> bool:
+        """En qué canales contesta. El webhook de Chatwoot es de cuenta, no de
+        bandeja: llega TODO, así que el filtro va acá."""
+        if not config.canales:
+            return False
+        canal_entrante = canal.canal_de(entrante.conversacion)
+        if canal_entrante and canal_entrante not in config.canales:
+            registro.info(
+                "[%s] de %s: fuera de los canales que atiende el agente",
+                entrante.conversacion,
+                canal_entrante,
+            )
+            return True
+        return False
+
+    async def _leer_adjuntos(entrante) -> str:
+        """Lo que escribió la persona, con lo que cuenta el lector de cada archivo.
+
+        Lo que no se pudo leer sigue el camino de siempre: queda anunciado y la
+        conversación pasa a una persona, con el motivo en la nota interna.
+        """
+        escrito = (entrante.datos.get("content") or "").strip()
+        partes = [escrito] if escrito else []
+        fallas = []
+        for archivo in archivos_del_evento(entrante.datos):
+            try:
+                relato = await asyncio.to_thread(lector.leer, archivo)
+            except NoSePuedeLeer as e:
+                fallas.append(f"{archivo.tipo} {archivo.nombre}: {e}".strip())
+                partes.append(f"[adjunto recibido: {archivo.como_se_llama()}, que no se pudo abrir]")
+                continue
+            except Exception as e:
+                # El error del proveedor no se esconde: va entero a la nota
+                # interna y al log. A la persona no, como en `responder`.
+                aviso = f"{type(e).__name__}: {e}"
+                registro.error("[%s] el lector falló: %s", entrante.conversacion, aviso)
+                fallas.append(f"{archivo.tipo} {archivo.nombre}: {aviso}".strip())
+                partes.append(f"[adjunto recibido: {archivo.como_se_llama()}, que no se pudo abrir]")
+                continue
+            registro.info("[%s] leí %s", entrante.conversacion, archivo.como_se_llama())
+            partes.append(f"[la persona mandó {archivo.como_se_llama()}. Lo que muestra: {relato}]")
+        if fallas:
+            traspaso.pedir(
+                entrante.conversacion,
+                "Mandó archivos que el agente no pudo leer (" + "; ".join(fallas) + "). "
+                "Hay que abrirlos a mano.",
+            )
+        return "\n".join(partes)
+
+    async def _atender(entrante, contexto: str = "") -> None:
+        """Suma el mensaje a la ráfaga, con sus archivos ya leídos si se puede."""
+        conversacion = entrante.conversacion
+        # El contexto de la vuelta va pegado al mensaje y no como parte
+        # aparte: sin espera en el buffer, saldría como una respuesta sola.
+        def con_contexto(texto: str) -> str:
+            return f"{contexto}\n{texto}" if contexto else texto
+
+        if entrante.adjuntos and lector is not None and ajustes.vigentes().leer_adjuntos:
+            # La lectura tarda unos segundos: entra a la ráfaga como algo que
+            # se espera al soltarla, y el webhook contesta ya.
+            async def leido() -> str:
+                return con_contexto(await _leer_adjuntos(entrante))
+
+            await buffer.agregar(conversacion, asyncio.create_task(leido()))
+            return
+
+        # Un archivo que el bot no lee lo pasa a una persona, siempre y sin
+        # preguntarle al modelo: dejarlo a su criterio es dejarlo al azar, y el
+        # caso que nos importa —alguien mandando el pensum que no encontró— es
+        # justo el que no se puede perder. El traspaso se consume después de
+        # enviar: el agente igual acusa recibo, y recién ahí la conversación
+        # cambia de manos.
+        if entrante.adjuntos:
+            traspaso.pedir(
+                conversacion,
+                "Mandó archivos que el agente no puede leer ("
+                + ", ".join(entrante.adjuntos)
+                + "). Hay que abrirlos a mano.",
+            )
+        await buffer.agregar(conversacion, con_contexto(entrante.texto))
+
+    async def _quizas_retomar(entrante) -> None:
+        """Si la persona volvió a escribir pasadas 24 horas de la última
+        respuesta de Ian, la conversación vuelve al bot (ver vuelta.py)."""
+        conversacion = entrante.conversacion
+        try:
+            if time.monotonic() - retomadas.get(conversacion, float("-inf")) < RETOMADA_RECIEN:
+                # Otro mensaje de la misma ráfaga: la vuelta ya está hecha.
+                await _atender(entrante)
+                return
+            vigentes = ajustes.vigentes()
+            if not vigentes.devolver_al_bot:
+                return
+            mensajes = await asyncio.to_thread(canal.historial, conversacion)
+            ultima = ultima_respuesta_de_ian(mensajes, config.chatwoot_etiqueta_humano)
+            if ultima is None:
+                # Ian nunca le contestó: esa persona espera a alguien del
+                # equipo, no al bot.
+                return
+            ahora = time.time()
+            if ahora - ultima < vigentes.devolver_tras:
+                return
+            anteriores = [m for m in mensajes if str(m.get("id") or "") != entrante.identificador]
+            contexto = contexto_de_la_vuelta(anteriores, config.chatwoot_etiqueta_humano)
+            await asyncio.to_thread(canal.devolver_al_bot, conversacion, NOTA_DE_LA_VUELTA)
+            retomadas[conversacion] = time.monotonic()
+            registro.info(
+                "[%s] escribió %s h después de la última respuesta de Ian: la retoma el bot",
+                conversacion,
+                int((ahora - ultima) // 3600),
+            )
+            await _atender(entrante, contexto)
+        except Exception as e:
+            # Si esto falla la conversación queda como estaba, con Ian: es lo
+            # mismo que pasaba antes de que existiera la vuelta.
+            registro.error("[%s] no pude ver si la retoma el bot: %s", conversacion, e)
+
     @asynccontextmanager
     async def ciclo_de_vida(app: FastAPI):
         # Que los datos del equipo se VEAN en la bandeja. Chatwoot solo pinta
@@ -320,6 +472,14 @@ def crear_app(
         # aunque los datos se hayan guardado bien.
         if hasattr(canal, "asegurar_atributos"):
             await asyncio.to_thread(canal.asegurar_atributos)
+        # Los interruptores del admin, antes del primer mensaje.
+        vigentes = await asyncio.to_thread(ajustes.leer)
+        registro.info(
+            "Ajustes del soporte - leer adjuntos %s (%s) - volver al bot %s",
+            "sí" if vigentes.leer_adjuntos else "no",
+            "con Gemini" if lector is not None else "sin lector",
+            "sí" if vigentes.devolver_al_bot else "no",
+        )
         registro.info(
             "Agente escuchando - %s / %s - memoria %s - buffer %ss - canales %s - firma %s",
             config.proveedor,
@@ -391,44 +551,29 @@ def crear_app(
         if entrante is not None:
             asyncio.create_task(asyncio.to_thread(_clasificar, entrante))
 
-        if entrante is None or not canal.deberia_responder(entrante):
+        if entrante is None:
+            return JSONResponse({"estado": "ignorado"})
+
+        if not canal.deberia_responder(entrante):
+            # La etiqueta del traspaso ya no es para siempre: si es lo único
+            # que lo calla, puede que la conversación vuelva al bot. Se mira en
+            # otro lado porque pide el historial, y el webhook contesta ya.
+            calla = getattr(canal, "calla_por_la_etiqueta", None)
+            if calla is not None and calla(entrante) and not _fuera_de_los_canales(entrante):
+                canal.marcar_atendido(entrante)
+                asyncio.create_task(_quizas_retomar(entrante))
+                return JSONResponse({"estado": "revisando"})
             # No es un error: es la mayoría de lo que llega. Cada respuesta
             # que manda el propio agente vuelve como un evento más.
             return JSONResponse({"estado": "ignorado"})
 
-        # En qué canales contesta. El webhook de Chatwoot es de cuenta, no de
-        # bandeja: llega TODO, así que el filtro va acá. La ficha se guarda
-        # igual unas líneas más arriba, porque a quien atienda a mano esos
-        # datos le sirven venga de donde venga.
-        if config.canales:
-            canal_entrante = canal.canal_de(entrante.conversacion)
-            if canal_entrante and canal_entrante not in config.canales:
-                registro.info(
-                    "[%s] de %s: fuera de los canales que atiende el agente",
-                    entrante.conversacion,
-                    canal_entrante,
-                )
-                return JSONResponse({"estado": "ignorado"})
-
-        # Un archivo lo pasa a una persona, siempre y sin preguntarle al
-        # modelo. El agente no sabe abrirlos: no puede leer el PDF de un plan
-        # de estudios ni la captura de un error. Dejarlo a su criterio es
-        # dejarlo al azar, y el caso que nos importa —alguien mandando el
-        # pensum que no encontró— es justo el que no se puede perder.
-        #
-        # Va acá y no adentro de la respuesta porque el traspaso se consume
-        # después de enviar: el agente igual acusa recibo, y recién ahí la
-        # conversación cambia de manos.
-        if entrante.adjuntos:
-            traspaso.pedir(
-                entrante.conversacion,
-                "Mandó archivos que el agente no puede leer ("
-                + ", ".join(entrante.adjuntos)
-                + "). Hay que abrirlos a mano.",
-            )
+        # La ficha se guarda igual unas líneas más arriba, porque a quien
+        # atienda a mano esos datos le sirven venga de donde venga.
+        if _fuera_de_los_canales(entrante):
+            return JSONResponse({"estado": "ignorado"})
 
         # Se suma a la ráfaga y contestamos ya. Lo que sigue pasa solo.
-        await buffer.agregar(entrante.conversacion, entrante.texto)
+        await _atender(entrante)
 
         return JSONResponse({"estado": "recibido"})
 

@@ -33,7 +33,7 @@ import json
 import urllib.error
 import urllib.request
 from collections import deque
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 from .base import Canal, MensajeEntrante
 from .ficha import Ficha, leer_ficha
@@ -41,6 +41,18 @@ from .ficha import Ficha, leer_ficha
 # Cuánto esperamos a que Chatwoot conteste. Corre en el mismo servidor que
 # el agente, así que si tarda más que esto es porque algo anda mal.
 ESPERA_DE_RED = 20
+
+# Bajar un archivo tarda más que una consulta: una foto o un PDF de unos megas.
+ESPERA_DE_ARCHIVO = 60
+
+# Va en `content_attributes` de todo lo que manda el bot. El bot escribe con el
+# usuario de Ian, así que sin esta marca el admin no distingue quién contestó
+# (ver vuelta.py).
+MARCA_BOT = {"studiante_bot": True}
+
+# Pasa el MESSAGE_ID_MAX de Chatwoot: como `before` levanta el tope de arriba,
+# y con after=0 un solo pedido trae la conversación entera (hasta 1.000).
+TODOS_LOS_MENSAJES = 2_147_483_648
 
 
 class ErrorDeChatwoot(Exception):
@@ -162,6 +174,25 @@ class Chatwoot(Canal):
             self._ya_contestados.append(mensaje.identificador)
 
         return True
+
+    def calla_por_la_etiqueta(self, mensaje: MensajeEntrante) -> bool:
+        """Si el ÚNICO motivo para no contestarle es la etiqueta del traspaso.
+
+        Es el caso que puede volver al bot (ver vuelta.py): un mensaje de la
+        persona, público y nuevo, en una conversación que tiene Ian. No marca
+        el mensaje como contestado: eso lo hace quien decida retomarla.
+        """
+        evento = mensaje.datos
+        if _tipo_de_mensaje(evento) != "incoming" or evento.get("private"):
+            return False
+        if mensaje.identificador and mensaje.identificador in self._ya_contestados:
+            return False
+        return self._la_atiende_una_persona(evento)
+
+    def marcar_atendido(self, mensaje: MensajeEntrante) -> None:
+        """Lo anota como contestado, para que un reintento de Chatwoot no lo repita."""
+        if mensaje.identificador and mensaje.identificador not in self._ya_contestados:
+            self._ya_contestados.append(mensaje.identificador)
 
     def la_atiende_una_persona(self, conversacion: str) -> bool:
         """Si esa conversación ya la tomó alguien del equipo.
@@ -419,7 +450,11 @@ class Chatwoot(Canal):
             self._api(
                 "POST",
                 f"conversations/{conversacion}/messages",
-                {"content": texto, "message_type": "outgoing"},
+                {
+                    "content": texto,
+                    "message_type": "outgoing",
+                    "content_attributes": MARCA_BOT,
+                },
             )
 
     def pasar_a_una_persona(self, conversacion: str, motivo: str) -> None:
@@ -437,13 +472,79 @@ class Chatwoot(Canal):
             self._api(
                 "POST",
                 f"conversations/{conversacion}/messages",
-                {"content": motivo, "message_type": "outgoing", "private": True},
+                {
+                    "content": motivo,
+                    "message_type": "outgoing",
+                    "private": True,
+                    "content_attributes": MARCA_BOT,
+                },
             )
         except Exception as e:
             print(f"[chatwoot] no se pudo dejar la nota en {conversacion}: {e}")
 
         if self.etiqueta_humano:
             self._etiquetar(conversacion, [self.etiqueta_humano])
+
+    def historial(self, conversacion: str) -> list[dict]:
+        """La conversación entera, del primer mensaje al último."""
+        respuesta = self._api(
+            "GET",
+            f"conversations/{conversacion}/messages?after=0&before={TODOS_LOS_MENSAJES}",
+        )
+        return respuesta.get("payload") or []
+
+    def devolver_al_bot(self, conversacion: str, nota: str) -> bool:
+        """Le quita la etiqueta del traspaso y deja una nota que dice por qué.
+
+        Devuelve si la quitó: dos mensajes seguidos de la persona pueden pedir
+        lo mismo, y la nota va una sola vez.
+        """
+        if not self.etiqueta_humano:
+            return False
+        actuales = self._etiquetas_de(conversacion)
+        if not self._tiene_la_etiqueta(actuales):
+            return False
+        # La API de etiquetas REEMPLAZA la lista entera: se manda todo lo que
+        # tenía menos la del traspaso.
+        quedan = [e for e in actuales if str(e).strip().lower() != self.etiqueta_humano]
+        self._api("POST", f"conversations/{conversacion}/labels", {"labels": quedan})
+        try:
+            self._api(
+                "POST",
+                f"conversations/{conversacion}/messages",
+                {
+                    "content": nota,
+                    "message_type": "outgoing",
+                    "private": True,
+                    "content_attributes": MARCA_BOT,
+                },
+            )
+        except Exception as e:
+            print(f"[chatwoot] no se pudo dejar la nota de la vuelta en {conversacion}: {e}")
+        return True
+
+    def descargar(self, url: str, tope: int) -> tuple[bytes, str]:
+        """Baja un adjunto: los bytes y el tipo que dice el servidor.
+
+        Solo de la propia bandeja, por https y sin salir de ella en las
+        redirecciones: la dirección viene en un mensaje, y un mensaje lo
+        escribe cualquiera.
+        """
+        host = urlparse(self.url).netloc
+        destino = urlparse(url)
+        if destino.scheme != "https" or destino.netloc != host:
+            raise ErrorDeChatwoot("el adjunto no está en la bandeja de Chatwoot")
+
+        abridor = urllib.request.build_opener(_SoloEnLaBandeja(host))
+        pedido = urllib.request.Request(
+            url, headers={"User-Agent": "Studiante-Agente/1.0 (+https://studiante.app)"}
+        )
+        with abridor.open(pedido, timeout=ESPERA_DE_ARCHIVO) as respuesta:
+            datos = respuesta.read(tope + 1)
+            tipo = respuesta.headers.get("Content-Type", "")
+        if len(datos) > tope:
+            raise ErrorDeChatwoot(f"el adjunto pesa más de {tope // (1024 * 1024)} MB")
+        return datos, tipo
 
     def escribiendo(self, conversacion: str, encendido: bool = True) -> None:
         """El "escribiendo..." mientras el modelo piensa.
@@ -505,6 +606,25 @@ class Chatwoot(Canal):
 
 
 # -- Ayudantes ----------------------------------------------------------------
+
+
+class _SoloEnLaBandeja(urllib.request.HTTPRedirectHandler):
+    """Sigue las redirecciones de un adjunto solo dentro de Chatwoot.
+
+    Active Storage contesta con una redirección al archivo, en el mismo host.
+    Una que mande a otro lado no se sigue.
+    """
+
+    def __init__(self, host: str) -> None:
+        super().__init__()
+        self.host = host
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        destino = urlparse(newurl)
+        if destino.scheme != "https" or destino.netloc != self.host:
+            raise ErrorDeChatwoot("el adjunto redirige fuera de la bandeja")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
 
 
 def _adjuntos_de(evento: dict) -> list[str]:

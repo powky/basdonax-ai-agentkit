@@ -82,6 +82,15 @@ class Config:
     # (ver desde_entorno): el webhook de Chatwoot es de cuenta, así que un
     # despliegue sin esa variable contestaría hasta los correos.
     canales: tuple[str, ...] = ()
+    # El API de Studiante y la llave (con el permiso support:config) con la
+    # que el bot lee sus interruptores del admin: leer adjuntos y volver al
+    # bot a las 24 horas (ajustes_soporte.py). Sin llave valen los de fábrica.
+    studiante_api_url: str = ""
+    studiante_soporte_llave: str = ""
+    # El modelo que lee las fotos, los PDF y los audios (lector.py). Solo se
+    # usa con Gemini: el que contesta no los ve, ve lo que este cuenta.
+    modelo_lector: str = "gemini-2.5-flash"
+    prompt_lector: Path | None = None
 
 
     @classmethod
@@ -155,6 +164,12 @@ class Config:
             # una decisión que se toma a mano, no algo que salga de olvidarse
             # de una variable: por eso "todos" se escribe, y se escribe así.
             canales=_canales(os.getenv("CANALES")),
+            studiante_api_url=(
+                os.getenv("STUDIANTE_API_URL") or "https://api.studiante.app/api/v1"
+            ).strip().rstrip("/"),
+            studiante_soporte_llave=(os.getenv("STUDIANTE_SOPORTE_LLAVE") or "").strip(),
+            modelo_lector=(os.getenv("MODELO_LECTOR") or "gemini-2.5-flash").strip(),
+            prompt_lector=RAIZ / os.getenv("PROMPT_LECTOR", "prompts/lector-adjuntos.md"),
         )
 
 

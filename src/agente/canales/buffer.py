@@ -22,6 +22,11 @@ seguimos esperando), pero hay un tope duro. Sin ese tope, alguien que manda
 un mensaje cada tanto dejaría al agente esperando para siempre y nunca
 recibiría respuesta.
 
+Una parte de la ráfaga puede llegar todavía sin escribir: la lectura de una
+foto o un PDF (lector.py) tarda unos segundos, así que se suma como algo que
+se espera, y se espera recién al soltar la ráfaga, en el lugar donde llegó.
+El reloj no se frena por eso: la persona sigue escribiendo mientras se lee.
+
 Está en memoria a propósito. El AGENTS.md dice Redis, y va a hacer falta
 cuando haya más de un proceso atendiendo: hoy hay uno solo, y una ráfaga que
 se pierde si el contenedor se reinicia justo en esos segundos no justifica
@@ -32,7 +37,13 @@ clase y nada más — el webhook no se entera.
 from __future__ import annotations
 
 import asyncio
-from typing import Awaitable, Callable
+import logging
+from typing import Awaitable, Callable, Union
+
+registro = logging.getLogger("agente.buffer")
+
+# Un pedazo de la ráfaga: el texto, o lo que falta para tenerlo.
+Parte = Union[str, Awaitable[str]]
 
 
 class BufferDeMensajes:
@@ -56,15 +67,15 @@ class BufferDeMensajes:
         # cada 50 segundos con una espera de 60 no se contesta nunca.
         self.tope = float(tope) if tope is not None else self.segundos * 3
 
-        self._pendientes: dict[str, list[str]] = {}
+        self._pendientes: dict[str, list[Parte]] = {}
         self._relojes: dict[str, asyncio.Task] = {}
         self._arrancó_en: dict[str, float] = {}
 
-    async def agregar(self, conversacion: str, texto: str) -> None:
+    async def agregar(self, conversacion: str, texto: Parte) -> None:
         """Suma un mensaje a la ráfaga de esa conversación."""
         # Sin espera configurada no hay ráfaga que juntar: se contesta y listo.
         if self.segundos <= 0:
-            await self.al_completar(conversacion, texto)
+            await self.al_completar(conversacion, await _juntar([texto]))
             return
 
         self._pendientes.setdefault(conversacion, []).append(texto)
@@ -100,7 +111,7 @@ class BufferDeMensajes:
         if not partes:
             return
 
-        await self.al_completar(conversacion, "\n".join(partes))
+        await self.al_completar(conversacion, await _juntar(partes))
 
     def pendientes(self, conversacion: str) -> int:
         """Cuántos mensajes hay esperando. Lo usan los tests y el /salud."""
@@ -122,4 +133,21 @@ class BufferDeMensajes:
 
         for conversacion, partes in pendientes.items():
             if partes:
-                await self.al_completar(conversacion, "\n".join(partes))
+                await self.al_completar(conversacion, await _juntar(partes))
+
+
+async def _juntar(partes: list[Parte]) -> str:
+    """La ráfaga en un solo texto, con cada lectura ya terminada."""
+    textos = []
+    for parte in partes:
+        if isinstance(parte, str):
+            textos.append(parte)
+            continue
+        try:
+            textos.append(await parte)
+        except Exception as e:
+            # La lectura ya convierte sus fallas en texto y en traspaso (ver
+            # webhook.py): si igual algo se escapa, se pierde esa parte y no la
+            # ráfaga entera, que es lo que sí importa que llegue.
+            registro.error("una parte de la ráfaga no se pudo leer: %s", e)
+    return "\n".join(t for t in textos if t)
