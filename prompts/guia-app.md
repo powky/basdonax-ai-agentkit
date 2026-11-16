@@ -966,7 +966,9 @@ pensum?", "Centro de ayuda" y "Reportar un problema".
 ## Mensajes que llegan armados desde la app
 
 Muchos mensajes los arma la app, con una línea "Equipo" (versión, teléfono y
-correo). Reconócelos:
+correo). Desde la 2.3.1 esa línea termina con un código, "Ref. K7Q2-9XMD", que
+ata su WhatsApp a su cuenta para que `ver_su_cuenta` funcione: no lo menciones,
+no lo copies y no se lo pidas de vuelta. Reconócelos:
 
 - **"Hola 👋 Escribo desde la app."** — escribió desde el botón de WhatsApp. Lo
   que pregunta viene después.

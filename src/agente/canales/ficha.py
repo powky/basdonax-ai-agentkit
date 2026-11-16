@@ -32,6 +32,10 @@ Los tres formatos, tal como salen de la app:
 La línea `Equipo:` se lee por CONTENIDO y no por posición: la app arma esa
 lista filtrando lo que esté vacío, así que un teléfono sin modelo detectado
 manda tres partes en vez de cuatro y por posición se leería todo corrido.
+
+Desde la 2.3.1 esa línea termina con un código ("Ref. K7Q2-9XMD") que ata el
+WhatsApp a la cuenta: lo lee el API, no esto. Acá solo se reconoce para que
+no termine guardado como el modelo del teléfono, y no se copia a ningún lado.
 """
 
 from __future__ import annotations
@@ -49,6 +53,10 @@ _CORREO = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _VERSION_APP = re.compile(r"^App\s+v?(?P<v>[\w.+-]+)(?:\s*\((?P<build>[\w.-]+)\))?$", re.IGNORECASE)
 _OTA = re.compile(r"^OTA\s+(?P<ota>[\w-]+)$", re.IGNORECASE)
 _SISTEMA = re.compile(r"^(?P<so>ios|android|ipados)\b\s*(?P<version>.*)$", re.IGNORECASE)
+_REF = re.compile(r"^ref\b\.?\s*:?\s*[0-9a-z]{4}[-\s]?[0-9a-z]{4}$", re.IGNORECASE)
+# "Hola 👋 No pude conectar el portal de UASD en Studiante." (FalloPortal), que
+# no trae renglón "Universidad:".
+_PORTAL_DE = re.compile(r"No pude conectar el portal de (.+?) en Studiante", re.IGNORECASE)
 
 
 @dataclass
@@ -131,6 +139,11 @@ def leer_ficha(texto: str) -> Ficha:
         if encontrado:
             ficha.correo = encontrado.group(0)
 
+    if not ficha.universidad and ficha.motivo == "portal":
+        portal = _PORTAL_DE.search(texto)
+        if portal:
+            ficha.universidad = portal.group(1).strip()
+
     ficha.etiquetas = [ficha.motivo] if ficha.motivo else []
     return ficha
 
@@ -166,6 +179,9 @@ def _leer_equipo(valor: str, ficha: Ficha) -> None:
         ota = _OTA.match(parte)
         if ota:
             ficha.ota = ota.group("ota")
+            continue
+
+        if _REF.match(parte):
             continue
 
         sistema = _SISTEMA.match(parte)

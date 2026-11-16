@@ -48,6 +48,8 @@ from langchain_core.tools import StructuredTool
 from ..canales.chatwoot import Chatwoot
 from ..contexto import canal_actual, conversacion_actual
 from ..config import Config
+from ..cuenta_soporte import NO_SE_PUDO, SIN_CUENTA, CuentaDelSoporte, redactar
+from ..fallas import contexto_de_fallas
 from ..lector import LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
 from ..mcp import catalogo_caido
 from ..vuelta import contexto_de_la_vuelta, ultima_respuesta_de_ian
@@ -106,6 +108,10 @@ NOTA_DE_LA_VUELTA = (
 # vuelven a pedir el historial ni a dejar otra nota.
 RETOMADA_RECIEN = 600
 
+# Cada cuánto, como mucho, se le vuelven a contar las fallas conocidas a la
+# misma conversación: el agente ya las tiene en su memoria.
+FALLAS_CADA = 30 * 60
+
 # Cuánto se acepta de desfase entre el reloj de Chatwoot y el nuestro. Sin este
 # tope, un pedido firmado interceptado hoy sirve para siempre.
 TOLERANCIA_FIRMA = 300
@@ -143,6 +149,7 @@ def crear_app(
     canal: Chatwoot | None = None,
     lector: LectorDeAdjuntos | None = None,
     ajustes: AjustesDelSoporte | None = None,
+    cuenta: CuentaDelSoporte | None = None,
 ) -> FastAPI:
     """Arma el servidor.
 
@@ -163,6 +170,10 @@ def crear_app(
     ajustes = ajustes or AjustesDelSoporte(
         config.studiante_api_url, config.studiante_soporte_llave
     )
+
+    # La cuenta de Studiante de quien escribe, si su WhatsApp quedó atado a
+    # ella con el código de la app (ver cuenta_soporte.py).
+    cuenta = cuenta or CuentaDelSoporte(config.studiante_api_url, config.studiante_soporte_llave)
 
     # El lector de adjuntos solo existe con Gemini, que lee fotos, PDF y
     # audio. Con otro proveedor los archivos siguen pasando a una persona.
@@ -205,6 +216,43 @@ def crear_app(
         ),
     )
 
+    # La conversación tampoco la pasa el modelo: sale del contextvar, así que
+    # nadie puede pedirle la cuenta de otra persona. `para` solo queda en el
+    # log (Gemini rechaza una herramienta sin ningún argumento).
+    def ver_su_cuenta(para: str = "") -> str:
+        """Lee la cuenta de quien escribe; el texto lo arma cuenta_soporte.py."""
+        conversacion = conversacion_actual.get()
+        if not conversacion or not cuenta.configurada():
+            return SIN_CUENTA
+        try:
+            datos = cuenta.de(conversacion)
+        except Exception as e:
+            # Tragado a propósito: el modelo recibe un texto que le dice qué
+            # hacer (no inventar y pasarla), y el error queda en el log.
+            registro.error("[%s] no pude leer su cuenta: %s", conversacion, e)
+            return NO_SE_PUDO
+        registro.info(
+            "[%s] miró su cuenta (%s)%s", conversacion,
+            "verificada" if datos.get("verified") else ("sin verificar" if datos.get("linked") else "sin cuenta"),
+            f": {para[:80]}" if para else "",
+        )
+        return redactar(datos)
+
+    herramienta_cuenta = StructuredTool.from_function(
+        func=ver_su_cuenta,
+        name="ver_su_cuenta",
+        description=(
+            "Lee la cuenta de Studiante de la persona con la que estás hablando: "
+            "sus carreras, el índice que reportó su universidad, cuándo se leyó "
+            "su récord, qué materias reprobadas le impiden los honores y si la app "
+            "de su teléfono quedó sin verificar. Úsala cuando pregunte por su "
+            "índice, sus notas, sus honores o por qué algo de su cuenta no carga o "
+            "no cuadra. Es siempre la cuenta de quien te escribe, y solo si su "
+            "WhatsApp quedó atado a ella; si no, te dice cómo conseguirlo. En "
+            "`para` pon en pocas palabras qué quieres averiguar."
+        ),
+    )
+
     herramienta_nombre = StructuredTool.from_function(
         func=guardar_nombre,
         name="guardar_nombre",
@@ -219,7 +267,7 @@ def crear_app(
     # queremos: adentro tiene la conexión a Postgres, y armarlo por mensaje
     # sería abrir una conexión nueva cada vez.
     agente = agente or Agente(
-        config, herramientas_extra=[herramienta_nombre, herramienta_persona]
+        config, herramientas_extra=[herramienta_nombre, herramienta_persona, herramienta_cuenta]
     )
 
     # Un candado por conversación. Dos personas distintas se atienden a la
@@ -348,6 +396,24 @@ def crear_app(
     # Las conversaciones que el bot retomó hace un rato, y cuándo.
     retomadas: dict[str, float] = {}
 
+    # A qué conversaciones se les contaron las fallas conocidas, y cuándo.
+    fallas_contadas: dict[str, float] = {}
+
+    def _fallas_para(entrante) -> str:
+        """Las fallas que otras personas ya reportaron, si este mensaje puede
+        ser de eso (ver fallas.py). Una vez cada FALLAS_CADA por conversación."""
+        fallas = ajustes.vigentes().fallas
+        conversacion = entrante.conversacion
+        if not fallas or time.monotonic() - fallas_contadas.get(conversacion, float("-inf")) < FALLAS_CADA:
+            return ""
+        contacto = ((entrante.datos.get("conversation") or {}).get("meta") or {}).get("sender") or {}
+        universidad = str((contacto.get("custom_attributes") or {}).get("universidad") or "")
+        bloque = contexto_de_fallas(fallas, conversacion, entrante.texto or "", universidad)
+        if bloque:
+            fallas_contadas[conversacion] = time.monotonic()
+            registro.info("[%s] le cuento las fallas conocidas", conversacion)
+        return bloque
+
     def _fuera_de_los_canales(entrante) -> bool:
         """En qué canales contesta. El webhook de Chatwoot es de cuenta, no de
         bandeja: llega TODO, así que el filtro va acá."""
@@ -400,6 +466,7 @@ def crear_app(
     async def _atender(entrante, contexto: str = "") -> None:
         """Suma el mensaje a la ráfaga, con sus archivos ya leídos si se puede."""
         conversacion = entrante.conversacion
+        contexto = "\n".join(x for x in (contexto, _fallas_para(entrante)) if x)
         # El contexto de la vuelta va pegado al mensaje y no como parte
         # aparte: sin espera en el buffer, saldría como una respuesta sola.
         def con_contexto(texto: str) -> str:
