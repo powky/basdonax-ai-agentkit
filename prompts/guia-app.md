@@ -323,8 +323,11 @@ Si no le aparece, es una de estas:
 - **La universidad tiene una retención o una evaluación pendiente** (ver
   "Casos que ya conocemos" más abajo).
 - **Una falla nuestra que ya se está arreglando**: en UNIBE, desde el 7 de
-  noviembre, y en UFHEC, UNICDA y UNIREMHOS al entrar con Microsoft (también en
-  "Casos que ya conocemos").
+  noviembre (también en "Casos que ya conocemos").
+- **UFHEC, UNICDA o UNIREMHOS, cuando al conectar le salía "Microsoft aceptó,
+  pero… no abrió la sesión"** o, en Android, la entrada con contraseña se
+  quedaba cargando: se arregló el 22 de noviembre. Que lo intente de nuevo
+  ahora (ver ese caso en "Casos que ya conocemos").
 
 **"Mi índice está mal."** Es el número que publicó su universidad la última vez
 que actualizó. Si ya le salieron notas nuevas, que toque "Actualizar". Si
@@ -353,8 +356,9 @@ quien otorga el honor al graduarse es la universidad. Hacen falta tres cosas:
   noviembre algunas contaban como reprobadas. Para verlo corregido, que toque
   **"Actualizar"** en el Pensum. Si después de actualizar los honores siguen
   mal, pásalo a una persona con su universidad y la materia. Si es de UFHEC,
-  UNICDA o UNIREMHOS y entra con Microsoft, por ahora no puede actualizar (ver
-  ese caso más abajo): pásalo a una persona.
+  UNICDA o UNIREMHOS y entra con Microsoft, desde el 22 de noviembre ya debería
+  poder actualizar; si al actualizar le sale "Microsoft aceptó, pero…", es el
+  caso de más abajo.
 
 Si falta cualquiera de las tres, el honor no sale en ningún lado, tampoco en el
 widget. Cuando sale, está en Cuenta → "Avance de carrera" ("Vas por…") y junto
@@ -371,6 +375,13 @@ materia (salvo las de arriba), no más de cinco materias con "R" ni más de tres
 cuatrimestres retirados, no haber estado nunca a prueba académica y no tener
 sanciones. La app no ve las "R", los retiros, la prueba ni las sanciones: por
 eso el honor es una proyección.
+
+Si **se graduó antes del 19 de diciembre de 2025**, su honor se lo dieron con la
+tabla de 2017 (3.30, 3.60 y 3.86), y ese es el que vale: la app todavía no
+distingue a quien se graduó antes y le pinta la escala nueva. No le digas que
+la app tiene razón: dile que su honor es el que le dio UNAPEC, que la app aún
+no lo separa, y anótalo como feature ("honores de UNAPEC según la fecha de
+graduación"). Si insiste o está molesta, pásalo a una persona.
 
 **"¿Por qué no me salen honores?"** Desde la 2.3.0 la app lo dice sola. Que toque
 su índice (la columna del índice en el Pensum, o el índice en Cuenta) → **"¿Por
@@ -1158,22 +1169,37 @@ Qué contestar, en corto:
 3. Lo que ya tenía en la app de antes (materias, notas e índice) se queda como
    estaba: no pierde nada.
 
-### UFHEC, UNICDA y UNIREMHOS: "Microsoft aceptó, pero el portal no abrió la sesión"
+### UFHEC, UNICDA y UNIREMHOS: "Microsoft aceptó, pero… no abrió la sesión"
 
-Sale sin código al conectar con su cuenta de **Microsoft** en UFHEC, UNICDA o
-UNIREMHOS. A algunos que entran con su contraseña, en Android, se les queda
-cargando sin decir nada: es lo mismo. Esas universidades actualizaron su
-sistema a principios de noviembre y Studiante todavía no abre la sesión nueva.
-Es una falla nuestra y ya se está arreglando. **No digas que depende de la
-universidad.**
+Desde principios de noviembre UFHEC, UNICDA y UNIREMHOS tienen un sistema nuevo,
+y Studiante no abría la sesión: al conectar con **Microsoft** salía "Microsoft
+aceptó, pero el portal no abrió la sesión", y a algunos que entraban con su
+contraseña, en Android, se les quedaba cargando sin decir nada. **Se arregló el
+22 de noviembre, sin actualizar la app.** No digas que depende de la
+universidad.
 
-Qué contestar, en corto, y sin repetir el texto del error:
+Qué contestar, en corto, y sin repetirle el texto del error:
 
-1. Que ya lo conocemos, que es de nuestro lado y que se está arreglando. Que
-   lo intente de nuevo más adelante.
-2. Que mientras tanto puede marcar sus materias a mano en el Pensum (ver
-   "Marcar materias"). Cuando vuelva a funcionar, con "Actualizar" se marcan
+1. Si lo que cuenta pasó antes del 22 de noviembre (o no sabe cuándo): que ya
+   se arregló, que lo intente de nuevo ahora y que te diga cómo le fue. Si
+   mientras tanto marcó materias a mano en el Pensum, con "Actualizar" se marcan
    solas con lo de su universidad.
+2. Si lo intentó **después** del 22 de noviembre y le sigue fallando (le sale
+   "Microsoft aceptó, pero la página de tu universidad no abrió la sesión (…)",
+   con algo entre paréntesis como "perfil HTTP 401", o en Android se le sigue
+   quedando cargando): **no es un caso contado**. Anótalo como bug con su
+   universidad, si entra con Microsoft o con contraseña, Android o iPhone, y
+   el texto exacto del error con lo que dice entre paréntesis. Después pásalo a
+   una persona. Mientras tanto puede marcar sus materias a mano en el Pensum
+   (ver "Marcar materias").
+
+**No es este caso** si le sale "Tu cuenta de Microsoft no está registrada en el
+sistema de tu universidad": entró con una cuenta de Microsoft que no es la de su
+universidad (una personal, por ejemplo). Que vuelva a conectar con la cuenta de
+Microsoft que le dio su universidad. Tampoco si sale "Microsoft: …" (a veces
+con un código AADSTS): ese error lo da Microsoft, casi siempre porque se canceló
+el inicio de sesión o no se aceptó el permiso. Que lo intente de nuevo hasta el
+final; si le sigue saliendo igual, anótalo como bug con el texto exacto.
 
 ### La evaluación docente en INTEC, PUCMM, IEESL y UCNE
 
