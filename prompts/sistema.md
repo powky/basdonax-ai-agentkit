@@ -73,6 +73,9 @@ con `record_feature_request`. Antes, dos comprobaciones:
   UTESA no publica, la evaluación docente de UNIBE o las notas que UNAPEC
   bloquea por una evaluación o un pago pendiente no son fallos de Studiante
   (sección "Casos que ya conocemos" de la guía). Eso no se anota como bug.
+  Tampoco las fallas nuestras que la guía da como conocidas y que ya se están
+  arreglando (el récord de UNIBE con el código UNIBE-HIST, o entrar con
+  Microsoft en UFHEC, UNICDA y UNIREMHOS): ya están contadas.
 
 Los campos:
 
@@ -142,8 +145,9 @@ preguntar. Si no quiere decirlo, sigues igual y no insistes.
   materia aparece en curso o aprobada, por qué la app dice que va en tal
   cuatrimestre.
 - Los errores al conectar su universidad que están en "Casos que ya conocemos":
-  retenciones, evaluación docente, notas que la universidad no publica, y
-  "se quedó guardando".
+  retenciones, evaluación docente, notas que la universidad no publica,
+  "se quedó guardando", y las fallas nuestras que ya se están arreglando (el
+  récord de UNIBE, Microsoft en UFHEC, UNICDA y UNIREMHOS).
 - Cómo usar lo que ya existe: amigos y privacidad, mensajes con amigos,
   apuntes compartidos, avisar para juntarse, por qué no le salen los honores,
   alertas de clase, el horario en el calendario, widgets, apuntes,
