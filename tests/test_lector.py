@@ -8,6 +8,8 @@ from __future__ import annotations
 import io
 import json
 import sys
+import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -17,7 +19,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from agente.ajustes_soporte import DE_FABRICA, AjustesDelSoporte  # noqa: E402
 from agente.config import RAIZ  # noqa: E402
-from agente.lector import Archivo, LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento  # noqa: E402
+from agente.lector import (  # noqa: E402
+    ESPERA_DEL_GASTO,
+    Archivo,
+    GastoDelLector,
+    LectorDeAdjuntos,
+    NoSePuedeLeer,
+    archivos_del_evento,
+    codigo_del_error,
+)
 
 
 class ModeloQueAnota:
@@ -175,3 +185,208 @@ def test_sin_llave_valen_los_de_fabrica_y_no_sale_a_la_red():
     assert ajustes.leer() == DE_FABRICA
     assert ajustes.vigentes() == DE_FABRICA
     assert abrir.pedidos == []
+
+
+# -- El gasto de cada lectura ---------------------------------------------------
+
+
+class ModeloQueGasta:
+    """Un Gemini de mentira que contesta con su consumo, o que falla."""
+
+    model = "gemini-2.5-flash"
+
+    def __init__(self, uso=None, falla: Exception | None = None, nombre="gemini-2.5-flash"):
+        self.uso = uso
+        self.falla = falla
+        self.nombre = nombre
+
+    def invoke(self, mensajes):
+        if self.falla is not None:
+            raise self.falla
+        return AIMessage(
+            content=[{"type": "text", "text": "una foto del horario de la UASD"}],
+            usage_metadata=self.uso,
+            response_metadata={"model_name": self.nombre},
+        )
+
+
+def anotador(*fallas):
+    """Un `abrir` que guarda cada pedido y su espera; con fallas, las levanta."""
+    pedidos = []
+
+    def abrir(pedido, timeout):
+        pedidos.append((pedido, timeout))
+        if fallas:
+            raise fallas[0]
+        return Respuesta(b"")
+
+    abrir.pedidos = pedidos
+    return abrir
+
+
+def en_el_mismo_hilo(tarea):
+    tarea()
+
+
+# Así lo devuelve LangChain para Gemini: la salida YA trae el razonamiento
+# sumado, y la entrada trae adentro lo que salió del caché.
+USO = {
+    "input_tokens": 1800,
+    "output_tokens": 420,
+    "total_tokens": 2220,
+    "input_token_details": {"cache_read": 600},
+    "output_token_details": {"reasoning": 300},
+}
+
+
+def error_de_google(codigo: int, estado: str, mensaje: str) -> Exception:
+    """El error como llega de verdad: el de Google envuelto en el de LangChain."""
+    from google.genai.errors import ClientError, ServerError
+    from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+
+    clase = ClientError if codigo < 500 else ServerError
+    adentro = clase(codigo, {"error": {"code": codigo, "message": mensaje, "status": estado}})
+    try:
+        try:
+            raise adentro
+        except Exception as e:
+            raise ChatGoogleGenerativeAIError(f"Error calling model 'gemini-2.5-flash' ({estado}): {e}") from e
+    except ChatGoogleGenerativeAIError as envuelto:
+        return envuelto
+
+
+def test_cada_lectura_le_cuenta_al_api_lo_que_gasto():
+    abrir = anotador()
+    gasto = GastoDelLector("https://api.x/api/v1/", "llave", abrir=abrir, lanzar=en_el_mismo_hilo)
+    lector = LectorDeAdjuntos(
+        ModeloQueGasta(USO, nombre="models/gemini-2.5-flash"), descarga(), INSTRUCCIONES, gasto=gasto
+    )
+
+    assert lector.leer(Archivo("file", "https://ws.x/a.pdf", "application/pdf")) == "una foto del horario de la UASD"
+
+    ((pedido, espera),) = abrir.pedidos
+    assert pedido.full_url == "https://api.x/api/v1/agent/support/ai/usage"
+    assert pedido.get_method() == "POST"
+    assert pedido.get_header("X-api-key") == "llave"
+    assert pedido.get_header("Content-type") == "application/json"
+    assert espera == ESPERA_DEL_GASTO == 3
+    assert json.loads(pedido.data) == {
+        "purpose": "support_reader",
+        "provider": "google",
+        "model": "gemini-2.5-flash",
+        "inputTokens": 1800,
+        "cachedTokens": 600,
+        # Sin el razonamiento, que va aparte: el API cobra los dos juntos.
+        "outputTokens": 120,
+        "thoughtsTokens": 300,
+        "ok": True,
+        "errorCode": "",
+    }
+
+
+def test_al_api_no_le_llega_nada_del_archivo_ni_de_la_conversacion():
+    abrir = anotador()
+    gasto = GastoDelLector("https://api.x", "llave", abrir=abrir, lanzar=en_el_mismo_hilo)
+    lector = LectorDeAdjuntos(ModeloQueGasta(USO), descarga(b"%PDF datos de Juan"), INSTRUCCIONES, gasto=gasto)
+
+    lector.leer(Archivo("file", "https://ws.x/Juan_Perez_Record.pdf", "application/pdf", 10, "Juan_Perez_Record.pdf"))
+
+    ((pedido, _),) = abrir.pedidos
+    crudo = pedido.data.decode("utf-8")
+    for dato in ("Juan", "Perez", "ws.x", "UASD", "PDF", "No copies"):
+        assert dato not in crudo, dato
+    assert set(json.loads(crudo)) == {
+        "purpose", "provider", "model", "inputTokens", "cachedTokens",
+        "outputTokens", "thoughtsTokens", "ok", "errorCode",
+    }
+
+
+def test_una_lectura_que_google_rechaza_tambien_se_cuenta_y_el_error_sube_igual():
+    abrir = anotador()
+    gasto = GastoDelLector("https://api.x", "llave", abrir=abrir, lanzar=en_el_mismo_hilo)
+    sin_saldo = error_de_google(402, "RESOURCE_EXHAUSTED", "Your prepayment credits are depleted.")
+    lector = LectorDeAdjuntos(ModeloQueGasta(falla=sin_saldo), descarga(), INSTRUCCIONES, gasto=gasto)
+
+    with pytest.raises(type(sin_saldo)) as levantado:
+        lector.leer(Archivo("file", "https://ws.x/a.pdf", "application/pdf"))
+
+    assert levantado.value is sin_saldo, "el error del proveedor no se esconde"
+    ((pedido, _),) = abrir.pedidos
+    cuerpo = json.loads(pedido.data)
+    assert cuerpo["ok"] is False and cuerpo["errorCode"] == "402"
+    assert cuerpo["model"] == "gemini-2.5-flash", "sin respuesta, el nombre sale del modelo"
+    assert (cuerpo["inputTokens"], cuerpo["outputTokens"], cuerpo["thoughtsTokens"]) == (0, 0, 0)
+
+
+@pytest.mark.parametrize(
+    "error, codigo",
+    [
+        (lambda: error_de_google(402, "RESOURCE_EXHAUSTED", "Your prepayment credits are depleted."), "402"),
+        (lambda: error_de_google(429, "RESOURCE_EXHAUSTED", "quota"), "429"),
+        (lambda: error_de_google(503, "UNAVAILABLE", "high demand"), "503"),
+        (lambda: TimeoutError("se cortó"), "timeout"),
+        (lambda: type("ReadTimeout", (Exception,), {})("lento"), "timeout"),
+        (lambda: ValueError("otra cosa"), "ValueError"),
+    ],
+)
+def test_el_codigo_del_error_es_el_estado_del_proveedor(error, codigo):
+    assert codigo_del_error(error()) == codigo
+
+
+def test_un_api_caido_no_tumba_la_lectura():
+    abrir = anotador(OSError("caído"))
+    gasto = GastoDelLector("https://api.x", "llave", abrir=abrir, lanzar=en_el_mismo_hilo)
+    lector = LectorDeAdjuntos(ModeloQueGasta(USO), descarga(), INSTRUCCIONES, gasto=gasto)
+
+    assert lector.leer(Archivo("file", "https://ws.x/a.pdf", "application/pdf")) == "una foto del horario de la UASD"
+    assert len(abrir.pedidos) == 1
+
+
+def test_un_api_lento_no_demora_la_lectura():
+    """El aviso sale en otro hilo: la lectura vuelve sin esperar al API."""
+    llamado, suelto = threading.Event(), threading.Event()
+
+    def abrir(pedido, timeout):
+        llamado.set()
+        suelto.wait(5)
+        raise OSError("tardó")
+
+    gasto = GastoDelLector("https://api.x", "llave", abrir=abrir)
+    lector = LectorDeAdjuntos(ModeloQueGasta(USO), descarga(), INSTRUCCIONES, gasto=gasto)
+    try:
+        antes = time.monotonic()
+        assert lector.leer(Archivo("file", "https://ws.x/a.pdf", "application/pdf"))
+        assert time.monotonic() - antes < 1
+        assert llamado.wait(2), "el aviso salió igual"
+    finally:
+        suelto.set()
+
+
+def test_sin_llave_ni_api_no_se_cuenta_nada():
+    for url, llave in (("https://api.x", ""), ("", "llave")):
+        abrir = anotador()
+        gasto = GastoDelLector(url, llave, abrir=abrir, lanzar=en_el_mismo_hilo)
+        LectorDeAdjuntos(ModeloQueGasta(USO), descarga(), INSTRUCCIONES, gasto=gasto).leer(
+            Archivo("file", "https://ws.x/a.pdf", "application/pdf")
+        )
+        assert abrir.pedidos == []
+
+
+def test_un_consumo_raro_cuenta_como_cero_y_no_rompe():
+    abrir = anotador()
+    gasto = GastoDelLector("https://api.x", "llave", abrir=abrir, lanzar=en_el_mismo_hilo)
+    gasto.anotar(None, {"input_tokens": "mil", "output_tokens": -3, "input_token_details": None})
+    gasto.anotar("gemini-2.5-flash", {"input_tokens": 10, "input_token_details": {"cache_read": 50}})
+
+    raro, de_mas = (json.loads(p.data) for p, _ in abrir.pedidos)
+    assert (raro["model"], raro["inputTokens"], raro["outputTokens"]) == ("", 0, 0)
+    assert de_mas["cachedTokens"] == 10, "el caché nunca pasa de la entrada"
+
+
+def test_si_no_puede_lanzar_el_hilo_la_lectura_sigue():
+    def no_hay_hilos(tarea):
+        raise RuntimeError("can't start new thread")
+
+    gasto = GastoDelLector("https://api.x", "llave", abrir=anotador(), lanzar=no_hay_hilos)
+    lector = LectorDeAdjuntos(ModeloQueGasta(USO), descarga(), INSTRUCCIONES, gasto=gasto)
+    assert lector.leer(Archivo("file", "https://ws.x/a.pdf", "application/pdf"))

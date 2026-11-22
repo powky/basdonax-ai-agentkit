@@ -296,3 +296,44 @@ def test_el_reintento_de_chatwoot_no_la_retoma_dos_veces():
         time.sleep(0.2)
 
     assert len(canal.devueltas) == 1 and len(agente.recibido) == 1
+
+
+def test_con_gemini_el_lector_le_cuenta_su_gasto_al_api(monkeypatch):
+    """El lector que arma el webhook lleva el aviso de gasto con la llave del bot."""
+    import agente.modelos as modelos
+    import agente.web.webhook as modulo
+    from agente.lector import GastoDelLector
+
+    armados = []
+
+    class LectorQueAnota:
+        def __init__(self, modelo, descargar, instrucciones, gasto=None):
+            armados.append(gasto)
+
+    monkeypatch.setattr(modulo, "LectorDeAdjuntos", LectorQueAnota)
+    monkeypatch.setattr(modelos, "crear_modelo", lambda *a, **k: object())
+    config = Config(
+        proveedor="gemini",
+        modelo="gemini-2.5-pro",
+        api_key="no-hace-falta",
+        max_tokens=1024,
+        memoria_mensajes=20,
+        prompt_sistema=RAIZ / "prompts/sistema.md",
+        chatwoot_url="https://ws.ejemplo.com",
+        chatwoot_token="token",
+        chatwoot_webhook_token=TOKEN,
+        buffer_segundos=0,
+        studiante_api_url="https://api.ejemplo.com/api/v1",
+        studiante_soporte_llave="llave-del-bot",
+    )
+
+    class CanalQueDescarga(Canal):
+        def descargar(self, url, tope):
+            raise AssertionError("no debería bajar nada")
+
+    modulo.crear_app(config, agente=AgenteQueAnota(), canal=CanalQueDescarga(), ajustes=AjustesFijos())
+
+    (gasto,) = armados
+    assert isinstance(gasto, GastoDelLector) and gasto.configurado()
+    assert gasto.url == "https://api.ejemplo.com/api/v1/agent/support/ai/usage"
+    assert gasto.llave == "llave-del-bot"

@@ -50,7 +50,7 @@ from ..contexto import canal_actual, conversacion_actual, personales_actuales
 from ..config import Config
 from ..cuenta_soporte import NO_SE_PUDO, SIN_CUENTA, CuentaDelSoporte, redactar
 from ..fallas import contexto_de_fallas
-from ..lector import LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
+from ..lector import GastoDelLector, LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
 from ..mcp import catalogo_caido
 from ..privacidad import DatosPersonales
 from ..vuelta import contexto_de_la_vuelta, ultima_respuesta_de_ian
@@ -190,6 +190,9 @@ def crear_app(
             crear_modelo("gemini", config.api_key, config.modelo_lector, 2048),
             canal.descargar,
             config.prompt_lector,
+            # Cada lectura va con la clave del bot y no pasa por el API: se
+            # le cuenta aparte, para que el panel de costos la vea.
+            gasto=GastoDelLector(config.studiante_api_url, config.studiante_soporte_llave),
         )
 
     def guardar_nombre(nombre: str) -> str:

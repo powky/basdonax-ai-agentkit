@@ -192,6 +192,14 @@ Cosas que parecen bugs y no lo son, o que cuestan de encontrar:
   recibido: un PDF]»). El nombre del archivo suele ser el de la persona
   («Juan_Perez_Record.pdf») y la máscara no lo reconoce; queda en
   `MensajeEntrante.adjuntos`, que va solo a la nota interna del traspaso.
+- **El lector le cuenta su gasto al API** (`GastoDelLector`, en `lector.py`),
+  para el panel de costos del admin: cada llamada a Gemini, buena o rechazada,
+  va a `POST /agent/support/ai/usage` con los tokens y el estado del error
+  (`"402"`), y nada del archivo ni de la conversación. Sale en otro hilo con 3 s
+  de espera: un API caído o lento no frena la respuesta. La salida va **sin**
+  el razonamiento (LangChain lo suma a `output_tokens`), porque el API cobra
+  salida + razonamiento como Google y si no lo contaría dos veces. El precio lo
+  pone el API, nunca el bot.
 - **`use_responses_api=True` en `ChatOpenAI`, y no se puede sacar.** Por el
   endpoint viejo (`/v1/chat/completions`), pedirle herramientas a un modelo que
   razona —toda la familia gpt-5— devuelve un 400: *"Function tools with
