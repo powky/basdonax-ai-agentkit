@@ -135,7 +135,25 @@ def test_un_archivo_solo_ya_no_se_descarta():
     assert m is not None
     assert m.adjuntos == ["file plan de estudios.pdf"]
     # El agente solo lee el texto: si el aviso no va ahí, para él no llegó nada.
-    assert m.texto == "[adjunto recibido: file plan de estudios.pdf]"
+    # Y lee qué llegó, no cómo se llama: el nombre queda para la nota interna.
+    assert m.texto == "[adjunto recibido: un PDF]"
+
+
+def test_el_nombre_del_archivo_no_le_llega_al_agente():
+    """«Juan_Perez_Record.pdf» trae el nombre pegado al guion bajo: ni la
+    máscara ni el respaldo del API lo reconocen, así que no viaja."""
+    adjuntos = [
+        _pdf("Juan_Perez_Record.pdf"),
+        _pdf("CV_Maria_Gomez.pdf"),
+        {"file_type": "image", "data_url": "https://chatwoot.ejemplo.com/x/IMG_Ana_2001.jpg"},
+        {"file_type": "audio", "data_url": ""},
+    ]
+    m = ChatwootFalso().traducir(evento(texto="aquí va", adjuntos=adjuntos))
+
+    assert m.texto == "aquí va\n[adjunto recibido: un PDF, un PDF, una foto, una nota de voz]"
+    for nombre in ("Juan", "Perez", "Maria", "Gomez", "Ana"):
+        assert nombre not in m.texto
+    assert m.adjuntos[0] == "file Juan_Perez_Record.pdf", "la nota interna del traspaso sí lo lleva"
 
 
 def test_el_archivo_con_texto_no_le_pisa_lo_que_escribio():

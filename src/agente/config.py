@@ -17,7 +17,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 load_dotenv(RAIZ / ".env")
 
 
-PROVEEDORES_VALIDOS = ("claude", "openai", "gemini")
+PROVEEDORES_VALIDOS = ("claude", "openai", "gemini", "deepseek")
 MODOS_VALIDOS = ("test", "produccion")
 
 # Qué variable de entorno lleva la clave de cada proveedor
@@ -25,12 +25,18 @@ CLAVE_POR_PROVEEDOR = {
     "claude": "ANTHROPIC_API_KEY",
     "openai": "OPENAI_API_KEY",
     "gemini": "GOOGLE_API_KEY",
+    # DeepSeek no se llama directo: va por el proxy del API de Studiante, que
+    # tiene la clave de DeepSeek. Lo que se presenta ahí es la llave acotada
+    # del soporte, la misma que ya lee los interruptores y la cuenta.
+    "deepseek": "STUDIANTE_SOPORTE_LLAVE",
 }
 
 MODELOS_POR_DEFECTO = {
     "claude": "claude-opus-5",
     "openai": "gpt-5",
     "gemini": "gemini-2.5-pro",
+    # Una etiqueta: el modelo de verdad lo elige el API (ver modelos.py).
+    "deepseek": "deepseek-flash",
 }
 
 

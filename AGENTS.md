@@ -12,8 +12,9 @@ Si sos una persona: leé el `README.md`, es el que está escrito para vos.
 ## Qué es esto
 
 **AgentKit.** Un agente de IA conversacional que corre en la máquina
-del usuario. Sin servidor, sin hosting. Funciona con Claude, OpenAI o Gemini,
-intercambiables desde el `.env`.
+del usuario. Sin servidor, sin hosting. Funciona con Claude, OpenAI, Gemini o
+DeepSeek (este último a través del API de Studiante), intercambiables desde el
+`.env`.
 
 Construido sobre **LangChain + LangGraph**. La memoria son los *checkpointers*
 de LangGraph, indexados por `thread_id`.
@@ -44,6 +45,7 @@ Lo que importa acá es qué hace cada uno:
 | `traspaso.py` | Qué conversaciones hay que dejarle a una persona, y por qué |
 | `canales/ficha.py` | Lee la ficha que manda la app (versión, equipo, universidad) |
 | `modelos.py` | Crea el modelo y le pregunta al proveedor cuáles tiene |
+| `privacidad.py` | Tapa los datos personales antes de cada llamada al modelo y los vuelve a poner en la respuesta (prendido con DeepSeek) |
 | `memoria.py` | Los checkpointers: `ram` / `sqlite` / `postgres` |
 | `prompts.py` | Lee y guarda `prompts/sistema.md` |
 | `../prompts/guia-app.md` | El manual de la app, que se pega abajo del prompt |
@@ -169,6 +171,27 @@ Cosas que parecen bugs y no lo son, o que cuestan de encontrar:
 
 - **`stream_usage=True` en `ChatOpenAI`**: sin eso, OpenAI no informa tokens
   cuando la respuesta llega en streaming. Quedan en 0.
+- **Con `PROVEEDOR=deepseek` el modelo no ve ningún dato personal.** Es una
+  regla de Ian: «a DeepSeek no le enviemos PII nunca». `privacidad.py` cambia
+  nombres, correos, teléfonos, cédulas, matrículas, @usuarios y el «Ref.» por
+  marcadores (`[NOMBRE_1]`) en CADA llamada, y los vuelve a poner en la
+  respuesta y en los argumentos de las herramientas. La memoria guarda los
+  datos reales. Va por una subclase del modelo (`con_mascara`) y no por fuera
+  porque el grafo llama a lo que devuelve `bind_tools()`. Lo que se sabe de
+  quién escribe lo deja el webhook en `contexto.personales_actuales`. Sin
+  streaming a propósito: un marcador puede llegar partido entre dos pedazos.
+  Los nombres de terceros escritos a mano no se detectan (no tienen forma).
+- **DeepSeek va con `use_responses_api=False`**, al revés que OpenAI: no tiene
+  `/v1/responses`. La llave es `STUDIANTE_SOPORTE_LLAVE` (va en `X-Api-Key`) y
+  el modelo lo elige el API; `deepseek-flash` es solo la etiqueta.
+- **El cliente de DeepSeek espera 120 s y reintenta una vez.** Más que el API
+  a DeepSeek (90 s) y que Cloudflare al API (100 s): si cortara antes, el 504
+  del API, que viene con `x-should-retry: false`, no llegaría nunca y el
+  cliente reintentaría a ciegas.
+- **El aviso de un adjunto dice qué llegó, no cómo se llama** («[adjunto
+  recibido: un PDF]»). El nombre del archivo suele ser el de la persona
+  («Juan_Perez_Record.pdf») y la máscara no lo reconoce; queda en
+  `MensajeEntrante.adjuntos`, que va solo a la nota interna del traspaso.
 - **`use_responses_api=True` en `ChatOpenAI`, y no se puede sacar.** Por el
   endpoint viejo (`/v1/chat/completions`), pedirle herramientas a un modelo que
   razona —toda la familia gpt-5— devuelve un 400: *"Function tools with

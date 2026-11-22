@@ -114,6 +114,7 @@ class Agente:
             api_key=self.config.api_key,
             modelo=self.config.modelo,
             max_tokens=self.config.max_tokens,
+            url_api=self.config.studiante_api_url,
         )
 
         # La memoria: SQLite si MODO=test, Postgres si MODO=produccion.

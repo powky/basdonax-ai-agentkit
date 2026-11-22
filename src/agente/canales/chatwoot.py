@@ -35,6 +35,7 @@ import urllib.request
 from collections import deque
 from urllib.parse import unquote, urlparse
 
+from ..lector import archivos_del_evento
 from .base import Canal, MensajeEntrante
 from .ficha import Ficha, leer_ficha
 
@@ -123,7 +124,7 @@ class Chatwoot(Canal):
         # Entre corchetes y en tercera persona para que no lo confunda con
         # algo que escribió la persona.
         if adjuntos:
-            aviso = "[adjunto recibido: " + ", ".join(adjuntos) + "]"
+            aviso = aviso_de_adjuntos(evento)
             texto = f"{texto}\n{aviso}" if texto else aviso
 
         self._canales[str(id_conversacion)] = _canal_de(evento)
@@ -650,6 +651,19 @@ def _adjuntos_de(evento: dict) -> list[str]:
         nombre = unquote(url.rsplit("/", 1)[-1].split("?")[0]) if url else ""
         salida.append(f"{tipo} {nombre}".strip() if nombre else tipo)
     return salida
+
+
+def aviso_de_adjuntos(evento: dict) -> str:
+    """Lo que el agente lee de los archivos del mensaje: qué llegó, sin el nombre.
+
+    El nombre del archivo suele ser el de la persona («Juan_Perez_Record.pdf»,
+    «CV_Maria_Gomez.pdf») y no tiene forma que la máscara reconozca
+    (privacidad.py): pegado al guion bajo, o de alguien que no es el contacto,
+    salía derecho al modelo. Para acusar recibo y pasarla a una persona alcanza
+    con el tipo. El nombre sigue en `MensajeEntrante.adjuntos`, que va a la
+    nota interna del traspaso: esa la lee Ian, no el modelo.
+    """
+    return "[adjunto recibido: " + ", ".join(a.como_se_llama() for a in archivos_del_evento(evento)) + "]"
 
 
 def _canal_de(evento: dict) -> str:

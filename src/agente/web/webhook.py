@@ -46,12 +46,13 @@ from ..canales.buffer import BufferDeMensajes
 from langchain_core.tools import StructuredTool
 
 from ..canales.chatwoot import Chatwoot
-from ..contexto import canal_actual, conversacion_actual
+from ..contexto import canal_actual, conversacion_actual, personales_actuales
 from ..config import Config
 from ..cuenta_soporte import NO_SE_PUDO, SIN_CUENTA, CuentaDelSoporte, redactar
 from ..fallas import contexto_de_fallas
 from ..lector import LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
 from ..mcp import catalogo_caido
+from ..privacidad import DatosPersonales
 from ..vuelta import contexto_de_la_vuelta, ultima_respuesta_de_ian
 from .. import traspaso
 
@@ -111,6 +112,11 @@ RETOMADA_RECIEN = 600
 # Cada cuánto, como mucho, se le vuelven a contar las fallas conocidas a la
 # misma conversación: el agente ya las tiene en su memoria.
 FALLAS_CADA = 30 * 60
+
+# De cuántas conversaciones se recuerda quién escribe (ver privacidad.py). Es
+# lo que se tapa antes de mandarle nada al modelo; pasado el tope se olvida la
+# más vieja, y su próximo mensaje lo vuelve a traer en el contacto.
+TOPE_DE_PERSONALES = 5000
 
 # Cuánto se acepta de desfase entre el reloj de Chatwoot y el nuestro. Sin este
 # tope, un pedido firmado interceptado hoy sirve para siempre.
@@ -188,6 +194,11 @@ def crear_app(
 
     def guardar_nombre(nombre: str) -> str:
         """Guarda el nombre de la persona en el contacto de Chatwoot."""
+        # Desde ya es un dato que se tapa: el contacto con el nombre nuevo
+        # llega recién en el próximo evento de Chatwoot.
+        personales = personales_actuales.get()
+        if personales is not None:
+            personales.sumar("NOMBRE", nombre)
         return canal.guardar_nombre(conversacion_actual.get(), nombre)
 
     # La única tool que depende del canal: el resto vive en el MCP. La
@@ -231,6 +242,11 @@ def crear_app(
             # hacer (no inventar y pasarla), y el error queda en el log.
             registro.error("[%s] no pude leer su cuenta: %s", conversacion, e)
             return NO_SE_PUDO
+        # Lo personal que traiga la cuenta se tapa desde la próxima llamada al
+        # modelo, que es la que lee este resultado.
+        personales = personales_actuales.get()
+        if personales is not None:
+            personales.sumar_cuenta(datos)
         registro.info(
             "[%s] miró su cuenta (%s)%s", conversacion,
             "verificada" if datos.get("verified") else ("sin verificar" if datos.get("linked") else "sin cuenta"),
@@ -276,6 +292,33 @@ def crear_app(
     # y el segundo pisaría lo que guardó el primero.
     candados: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
 
+    # Quién escribe en cada conversación: lo que el modelo no puede ver.
+    personales: dict[str, DatosPersonales] = {}
+
+    def _personales_de(conversacion: str) -> DatosPersonales:
+        datos = personales.get(conversacion)
+        if datos is None:
+            if len(personales) >= TOPE_DE_PERSONALES:
+                personales.pop(next(iter(personales)))
+            datos = personales[conversacion] = DatosPersonales()
+        return datos
+
+    def _anotar_personales(entrante) -> None:
+        """Lo que el evento dice de quién escribe: su contacto, su número y la
+        ficha de la app. Se junta acá, antes de la ráfaga, porque después de
+        ella el evento ya no está."""
+        datos = _personales_de(entrante.conversacion)
+        evento = entrante.datos or {}
+        conversacion = evento.get("conversation") or {}
+        datos.sumar_contacto((conversacion.get("meta") or {}).get("sender") or {})
+        remitente = evento.get("sender") or {}
+        # En un mensaje que entra, el remitente es el contacto. Si dijera otra
+        # cosa (alguien del equipo), su nombre no es el de la persona.
+        if (remitente.get("type") or "contact") == "contact":
+            datos.sumar_contacto(remitente)
+        datos.sumar_por_forma(str((conversacion.get("contact_inbox") or {}).get("source_id") or ""))
+        datos.sumar_mensaje(entrante.texto or "")
+
     async def responder(conversacion: str, texto: str) -> None:
         """Le pasa la ráfaga al agente y manda la respuesta por Chatwoot."""
         async with candados[conversacion]:
@@ -294,6 +337,9 @@ def crear_app(
             # Por dónde entró: lo usan las tools del MCP para anotar de qué
             # canal salió cada pedido.
             canal_actual.set(canal.canal_de(conversacion))
+            # Y quién escribe: el modelo lo tapa antes de mandar nada. Va
+            # antes del to_thread, que es el que copia el contexto.
+            personales_actuales.set(_personales_de(conversacion))
 
             # El "escribiendo..." y el agente son código bloqueante (urllib y
             # el modelo). Van a un hilo aparte para no trabar el servidor:
@@ -466,6 +512,12 @@ def crear_app(
     async def _atender(entrante, contexto: str = "") -> None:
         """Suma el mensaje a la ráfaga, con sus archivos ya leídos si se puede."""
         conversacion = entrante.conversacion
+        try:
+            _anotar_personales(entrante)
+        except Exception as e:
+            # Lo que no se anotó se tapa igual por su forma (el correo, el
+            # teléfono); dejar sin respuesta a la persona por esto no.
+            registro.error("[%s] no pude anotar sus datos: %s", conversacion, e)
         contexto = "\n".join(x for x in (contexto, _fallas_para(entrante)) if x)
         # El contexto de la vuelta va pegado al mensaje y no como parte
         # aparte: sin espera en el buffer, saldría como una respuesta sola.

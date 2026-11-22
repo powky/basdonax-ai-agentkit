@@ -72,7 +72,9 @@ class Archivo:
     nombre: str = ""
 
     def como_se_llama(self) -> str:
-        if self.mime == "application/pdf":
+        # Por la terminación también: Chatwoot no siempre manda el tipo, y
+        # "un PDF" le dice al agente bastante más que "un archivo".
+        if (self.mime or _mime_por_nombre(self.nombre)) == "application/pdf":
             return "un PDF"
         return _NOMBRES.get(self.tipo, "un archivo")
 

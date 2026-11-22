@@ -103,6 +103,22 @@ def test_sin_mensajes_no_hay_contexto():
     assert contexto_de_la_vuelta([]) == ""
 
 
+def test_lo_largo_se_corta_en_un_espacio_y_no_parte_un_correo():
+    """El «pensum con error» trae la línea del equipo al final: cortado a los
+    300 justo en el correo, quedaba «mariafgomez2001@cor…», que ya no tiene
+    forma de correo para la máscara."""
+    relleno = "Qué está mal: " + "la materia no aparece en el cuatrimestre " * 6 + "y tampoco sale en la app "
+    correo = "mariafgomez2001@correo.com"
+    texto = relleno + correo + " · Ref. K7Q2-9XMD"
+    assert texto.index(correo) < 300 < texto.index(correo) + len(correo), "el corte cae en el correo"
+
+    contexto = contexto_de_la_vuelta([entra(100, texto)])
+
+    assert "mariafgomez" not in contexto and "@cor" not in contexto
+    linea = next(l for l in contexto.splitlines() if l.startswith("La persona:"))
+    assert linea.endswith("en la app…") and len(linea) <= len("La persona: ") + 301
+
+
 def test_desde_que_el_bot_marca_lo_que_sale_sin_marca_es_de_ian():
     from agente.vuelta import MARCAS_DESDE
 

@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from agente.ajustes_soporte import Ajustes  # noqa: E402
 from agente.canales.base import MensajeEntrante  # noqa: E402
-from agente.canales.chatwoot import _adjuntos_de  # noqa: E402
+from agente.canales.chatwoot import _adjuntos_de, aviso_de_adjuntos  # noqa: E402
 from agente.config import RAIZ, Config  # noqa: E402
 from agente.lector import NoSePuedeLeer  # noqa: E402
 from agente.web.webhook import NOTA_DE_LA_VUELTA, crear_app  # noqa: E402
@@ -53,7 +53,7 @@ class Canal:
         texto = evento.get("content", "")
         adjuntos = _adjuntos_de(evento)
         if adjuntos:
-            aviso = "[adjunto recibido: " + ", ".join(adjuntos) + "]"
+            aviso = aviso_de_adjuntos(evento)
             texto = f"{texto}\n{aviso}" if texto else aviso
         return MensajeEntrante(
             texto=texto,
@@ -198,7 +198,7 @@ def test_con_el_interruptor_apagado_el_archivo_pasa_a_una_persona(monkeypatch):
         cliente.post(f"/chatwoot/{TOKEN}", json=evento(adjuntos=[PDF]))
 
     assert lector.leidos == []
-    assert "[adjunto recibido: file pensum.pdf]" in agente.recibido[0]
+    assert "[adjunto recibido: un PDF]" in agente.recibido[0]
     assert len(canal.traspasos) == 1 and canal.traspasos[0][1].startswith("Mandó archivos")
 
 

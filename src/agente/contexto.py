@@ -23,6 +23,20 @@ vez no se pisan.
 from __future__ import annotations
 
 from contextvars import ContextVar
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .privacidad import DatosPersonales
 
 conversacion_actual: ContextVar[str] = ContextVar("conversacion_actual", default="")
 canal_actual: ContextVar[str] = ContextVar("canal_actual", default="")
+
+# Quién es la persona de la conversación que se atiende: su nombre, su
+# teléfono, su correo (ver privacidad.py). Lo pone el webhook y lo lee el
+# modelo para taparlo antes de mandar nada. Viaja como objeto, no como valor:
+# las herramientas corren con una COPIA del contexto, y lo que suman (la
+# cuenta, el nombre que se guardó) tiene que llegar a la próxima llamada al
+# modelo de la misma respuesta. La copia comparte el objeto; un .set() no.
+personales_actuales: ContextVar["DatosPersonales | None"] = ContextVar(
+    "personales_actuales", default=None
+)

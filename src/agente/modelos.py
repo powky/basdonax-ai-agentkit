@@ -2,7 +2,7 @@
 
 LangChain envuelve a todos los proveedores en la misma interfaz (BaseChatModel),
 así que el resto del código no sabe ni le importa si adentro hay Claude,
-OpenAI o Gemini. Cambiar de proveedor es cambiar una línea del .env.
+OpenAI, Gemini o DeepSeek. Cambiar de proveedor es cambiar una línea del .env.
 
 Este archivo hace dos cosas:
 
@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:  # pragma: no cover
     from langchain_core.language_models import BaseChatModel
 
-PROVEEDORES = ("claude", "openai", "gemini")
+PROVEEDORES = ("claude", "openai", "gemini", "deepseek")
 
 
 # ---------------------------------------------------------------------------
@@ -37,10 +37,18 @@ def crear_modelo(
     api_key: str,
     modelo: str,
     max_tokens: int,
+    url_api: str = "",
 ) -> "BaseChatModel":
-    """Devuelve el modelo de LangChain que corresponda al proveedor."""
+    """Devuelve el modelo de LangChain que corresponda al proveedor.
+
+    `url_api` es el API de Studiante (STUDIANTE_API_URL): solo lo usa
+    DeepSeek, que no se llama directo sino a través de él.
+    """
     proveedor = proveedor.strip().lower()
     max_tokens = limitar_max_tokens(proveedor, api_key, modelo, max_tokens)
+
+    if proveedor == "deepseek":
+        return modelo_deepseek(api_key, modelo, max_tokens, url_api)
 
     if proveedor == "claude":
         try:
@@ -106,7 +114,85 @@ def crear_modelo(
         )
 
     raise ValueError(
-        f"No conozco el proveedor '{proveedor}'. Usá: claude, openai o gemini."
+        f"No conozco el proveedor '{proveedor}'. Usá: claude, openai, gemini o deepseek."
+    )
+
+
+# El sufijo que el API de Studiante le pone a su proxy. El cliente de OpenAI
+# le suma "/chat/completions" al final.
+CAMINO_DEL_PROXY = "/agent/support/ai"
+
+# Cuánto espera el bot al proxy (ver modelo_deepseek).
+SEGUNDOS_PARA_DEEPSEEK = 120
+
+
+def modelo_deepseek(
+    llave: str,
+    modelo: str,
+    max_tokens: int,
+    url_api: str,
+    http_client=None,
+    http_async_client=None,
+) -> "BaseChatModel":
+    """DeepSeek, a través del API de Studiante.
+
+    El bot no tiene la clave de DeepSeek: la tiene el API (DEEPSEEK_API_KEY en
+    Render), que expone un proxy con la forma de Chat Completions de OpenAI.
+    Así no hace falta una clave más en Coolify, y el API aplica de su lado la
+    misma regla que esto: los datos personales no salen.
+
+    Tres cosas que no son obvias:
+
+      · **La llave va en X-Api-Key.** Es la llave acotada del soporte
+        (STUDIANTE_SOPORTE_LLAVE), y así la lee el API en todas sus rutas de
+        agente. El cliente de OpenAI la manda además como Bearer; el API la
+        ignora ahí.
+      · **El modelo lo elige el API** (su DEEPSEEK_MODEL), diga lo que diga
+        este nombre. "deepseek-flash" es la etiqueta, para los logs y la web.
+      · **Va con la máscara puesta** (privacidad.py): cada llamada sale con los
+        datos personales cambiados por marcadores, y vuelve con los reales.
+
+    `http_client` y `http_async_client` son para los tests, que miran el pedido
+    exacto que sale sin tocar la red.
+    """
+    if not url_api:
+        raise ValueError(
+            "DeepSeek va a través del API de Studiante y falta su dirección: "
+            "completá STUDIANTE_API_URL en el .env."
+        )
+    try:
+        from langchain_openai import ChatOpenAI
+    except ImportError:
+        raise ImportError(
+            "DeepSeek usa el paquete de OpenAI: pip install langchain-openai"
+        ) from None
+
+    from .privacidad import con_mascara
+
+    ChatOpenAIConMascara = con_mascara(ChatOpenAI)
+    return ChatOpenAIConMascara(
+        model=modelo,
+        api_key=llave,
+        base_url=url_api.rstrip("/") + CAMINO_DEL_PROXY,
+        default_headers={"X-Api-Key": llave},
+        # El API recibe los dos nombres del tope; el cliente manda este.
+        max_completion_tokens=max_tokens,
+        # Más que lo que espera el API a DeepSeek (90 s) y que Cloudflare, que
+        # está delante del API, al API (100 s). Si este cortara antes, el 504
+        # del API —que dice «no lo reintentes»— no llegaría nunca: el cliente
+        # reintentaría a ciegas, la persona esperaría minutos y el API no
+        # contaría la falla para avisarle a Ian.
+        timeout=SEGUNDOS_PARA_DEEPSEEK,
+        # Un reintento para un tropiezo (un 502 o un 503 del API). El 504, el
+        # 402 y los demás que no se arreglan reintentando vienen marcados con
+        # x-should-retry: false, y el cliente no los repite.
+        max_retries=1,
+        stream_usage=True,
+        # Al revés que con OpenAI: DeepSeek no tiene /v1/responses, solo el
+        # endpoint de siempre, y el proxy imita ese.
+        use_responses_api=False,
+        http_client=http_client,
+        http_async_client=http_async_client,
     )
 
 
@@ -183,6 +269,8 @@ def listar_modelos(proveedor: str, api_key: str) -> list[dict]:
             modelos = _modelos_openai(api_key)
         elif proveedor == "gemini":
             modelos = _modelos_gemini(api_key)
+        elif proveedor == "deepseek":
+            modelos = _modelos_deepseek()
         else:
             return []
     except Exception:
@@ -246,6 +334,14 @@ def _es_chat_de_openai(identificador: str) -> bool:
     )
     ident = identificador.lower()
     return ident.startswith(familias) and not any(p in ident for p in descartar)
+
+
+def _modelos_deepseek() -> list[dict]:
+    # Una lista fija y sin red: el proxy del API usa el modelo que tenga
+    # configurado, así que no hay nada que elegir ni a quién preguntarle.
+    # El tope es el de la serie deepseek-chat (8K de salida), para que un
+    # MAX_TOKENS alto que quedó de Gemini no termine en un 400.
+    return [{"id": "deepseek-flash", "nombre": "DeepSeek (vía el API de Studiante)", "max_salida": 8192}]
 
 
 def _modelos_gemini(api_key: str) -> list[dict]:

@@ -129,7 +129,12 @@ def contexto_de_la_vuelta(mensajes: list[dict], etiqueta: str = "humano", cuanto
         if not texto:
             continue
         if len(texto) > 300:
-            texto = texto[:300] + "…"
+            # Se corta en un espacio y la palabra a medias se va: un correo o
+            # un «Ref.» partido («mariafgomez2001@cor…») ya no tiene la forma
+            # que la máscara reconoce (privacidad.py), y su primera parte
+            # saldría al modelo.
+            corte = texto.rfind(" ", 0, 301)
+            texto = (texto[:corte] if corte > 0 else "") + "…"
         nombre = {"persona": "La persona", "bot": "Tú (el bot)", "ian": "Ian, del equipo"}[quien]
         lineas.append(f"{nombre}: {texto}")
     if not lineas:

@@ -90,6 +90,7 @@ Abrí el `.env` y completá **un solo** proveedor:
 | **Claude** | [console.anthropic.com](https://console.anthropic.com/settings/keys) | `ANTHROPIC_API_KEY` |
 | **OpenAI** | [platform.openai.com](https://platform.openai.com/api-keys) | `OPENAI_API_KEY` |
 | **Gemini** | [aistudio.google.com](https://aistudio.google.com/apikey) | `GOOGLE_API_KEY` |
+| **DeepSeek** | No se saca: va a través del API de Studiante, que tiene la clave | `STUDIANTE_SOPORTE_LLAVE` |
 
 Con uno alcanza. Si cargás más de uno, los cambiás desde la web con un botón.
 
@@ -116,7 +117,8 @@ basdonax-ai-agentkit/
 ├── src/agente/
 │   ├── agente.py           ← EL AGENTE. El grafo de LangGraph.
 │   ├── herramientas.py     ← lo que sabe hacer además de hablar (el clima)
-│   ├── modelos.py          ← Claude / OpenAI / Gemini
+│   ├── modelos.py          ← Claude / OpenAI / Gemini / DeepSeek
+│   ├── privacidad.py       ← tapa los datos personales antes de llamar al modelo
 │   ├── memoria.py          ← dónde se guardan las conversaciones
 │   ├── prompts.py          ← lee el prompt del archivo
 │   ├── respuesta.py        ← parte una respuesta larga en varios mensajes
@@ -317,6 +319,7 @@ CACHE=true    # en el .env — viene activado, dejalo así
 | **Claude** | Hay que marcarlo a mano — es lo que hace este repo por vos |
 | **OpenAI** | Automático, no hay que hacer nada |
 | **Gemini** | Automático, no hay que hacer nada |
+| **DeepSeek** | Automático, no hay que hacer nada |
 
 **Dos cosas para tener en cuenta:**
 
@@ -713,13 +716,14 @@ la herramienta le sirve. Si está mal escrito, la herramienta no se usa nunca.
 
 | Variable | Por defecto | Qué hace |
 |---|---|---|
-| `PROVEEDOR` | `claude` | `claude`, `openai` o `gemini` |
+| `PROVEEDOR` | `claude` | `claude`, `openai`, `gemini` o `deepseek` |
 | `ANTHROPIC_API_KEY` | — | Tu clave de Claude |
 | `OPENAI_API_KEY` | — | Tu clave de OpenAI |
 | `GOOGLE_API_KEY` | — | Tu clave de Gemini |
 | `MODELO_CLAUDE` | `claude-opus-5` | Qué modelo de Claude usar |
 | `MODELO_OPENAI` | `gpt-5` | Qué modelo de OpenAI usar |
 | `MODELO_GEMINI` | `gemini-2.5-pro` | Qué modelo de Gemini usar |
+| `MODELO_DEEPSEEK` | `deepseek-flash` | Solo una etiqueta: el modelo lo elige el API de Studiante |
 | `MODO` | `test` | `test` (SQLite) o `produccion` (Postgres) |
 | `SQLITE_RUTA` | `datos/conversaciones.db` | Dónde va el archivo, en modo test |
 | `POSTGRES_DSN` | — | La conexión, en modo producción |
