@@ -263,6 +263,61 @@ def test_correos_escritos_a_las_apuradas():
     assert Mascara().tapar("es @juan y escribe a ana@gmail.com. Gracias") == "es @[USUARIO_1] y escribe a [CORREO_1]. Gracias"
 
 
+ENLACES_DE_PLAN = [
+    # Tapados por forma eran un teléfono, una Ref. y una matrícula: el modelo
+    # tenía que copiar el marcador adentro del enlace para que volviera entero.
+    "https://studiante.app/l/p/uasd/IEMM/000012-2026",
+    "https://studiante.app/l/p/cef/MDAECEF/MDAE-2026",
+    "https://studiante.app/l/p/uce/6320023/6320-023",
+    "https://studiante.app/l/p/ucsd/ARQ/8212211-2025",
+    "https://studiante.app/l/p/pucmm/LENFE",
+]
+
+
+def test_el_enlace_de_un_plan_llega_entero_al_modelo():
+    """El MCP del catálogo trae el enlace de cada plan y el bot se lo manda a la
+    persona: adentro van solo códigos del catálogo, y no se tapan."""
+    for enlace in ENLACES_DE_PLAN:
+        for texto in (
+            enlace,
+            f"Este es tu plan: {enlace}\nTócalo desde tu teléfono.",
+            f"({enlace})",
+            f"{enlace}.",
+            '{"total":1,"rows":[{"plan":"x","link":"' + enlace + '"}]}',
+        ):
+            assert Mascara().tapar(texto) == texto, texto
+        # También en el resultado de la herramienta y en lo que ya contestó.
+        mensajes = [ToolMessage(f'{{"link":"{enlace}"}}', tool_call_id="c1"), AIMessage(f"Este es tu plan: {enlace}")]
+        assert [m.content for m in Mascara().tapar_mensajes(mensajes, nota=False)] == [m.content for m in mensajes]
+    # Afuera del enlace, el mismo código sí se tapa: la excepción es el enlace.
+    assert Mascara().tapar("el plan 000012-2026") == "el plan [TELEFONO_1]"
+    assert Mascara().tapar("MDAE-2026") == "[REF_1]"
+
+
+def test_lo_que_va_en_un_enlace_de_plan_sin_serlo_se_tapa_igual():
+    """La excepción no sirve para pasar un dato personal colgado del enlace."""
+    base = "https://studiante.app/l/p/uasd/LPSC"
+    casos = {
+        # Pegado detrás, después de un espacio o en la búsqueda.
+        "https://studiante.app/l/p/uce/6320023/6320-023 8095551234": "https://studiante.app/l/p/uce/6320023/6320-023 [TELEFONO_1]",
+        f"{base}/202510 juan@gmail.com": f"{base}/202510 [CORREO_1]",
+        f"{base}/202510?ref=8095551234": f"{base}/202510?ref=[TELEFONO_1]",
+        # Con una arroba o un cuarto pedazo ya no es un enlace de plan.
+        "https://studiante.app/l/p/uasd/juan@gmail.com": "https://studiante.app/l/p/uasd/[CORREO_1]",
+        f"{base}/202510/8095551234": f"{base}/[NUMERO_1]",
+        # Un teléfono de aquí o una cédula escrita como tal no son un código.
+        "https://studiante.app/l/p/uasd/8095551234": "https://studiante.app/l/p/uasd/[TELEFONO_1]",
+        f"{base}/001-1234567-8": f"{base}/[CEDULA_1]",
+        f"{base}/18295551234": f"{base}/[TELEFONO_1]",
+    }
+    for texto, tapado in casos.items():
+        assert Mascara().tapar(texto) == tapado, texto
+    # Lo que se sabe de la persona se tapa aunque esté adentro.
+    conocido = Mascara([("TELEFONO", "+18095551234"), ("NOMBRE", "Lpsc Pérez")])
+    assert conocido.tapar("https://studiante.app/l/p/uasd/X/809-555-1234") == "https://studiante.app/l/p/uasd/X/[TELEFONO_1]"
+    assert conocido.tapar(f"{base}/202510") == "https://studiante.app/l/p/uasd/[NOMBRE_1]/202510"
+
+
 def test_destapa_lo_que_el_modelo_escribio_distinto():
     mascara = Mascara([("NOMBRE", "Juan")])
     mascara.tapar("Juan, a@b.com")

@@ -458,6 +458,27 @@ _TIRA = re.compile(
 # arroba: el modelo ve "@[USUARIO_1]" y entiende que es un usuario.
 _ARROBA = re.compile(r"(?<![\w@.])@([A-Za-z0-9_][A-Za-z0-9_.]{0,28}[A-Za-z0-9_])")
 
+# El enlace de un plan que arma el MCP del catálogo (studiante-agent-mcp,
+# catalogo.mjs) y que el bot le manda a la persona para que lo toque:
+# https://studiante.app/l/p/<universidad>/<carrera>[/<plan>]. Lleva solo
+# códigos del catálogo, pero muchos tienen forma de dato personal —
+# "000012-2026" pasa por teléfono, "MDAE-2026" por una Ref., "6320023/6320-023"
+# por una matrícula—, y tapados así el modelo tenía que copiar el marcador
+# adentro del enlace para que volviera entero: 130 de los 1,176 enlaces.
+#
+# Por eso adentro de uno de estos no se busca por forma, salvo lo que no
+# puede ser un código: un teléfono de aquí (809, 829, 849) o una cédula escrita
+# como cédula (001-1234567-8), que ningún plan del catálogo tiene. Lo que se
+# sabe de la persona —su teléfono, su cédula, su nombre— se tapa igual aunque
+# esté adentro. El patrón es el del MCP y nada más: una arroba, un espacio o
+# un cuarto pedazo lo dejan de ser, así que un correo o un número pegados
+# detrás no viajan colgados del enlace.
+_ENLACE_DE_PLAN = re.compile(
+    r"https?://(?:www\.)?studiante\.app/l/p/[A-Za-z0-9-]{2,24}"
+    r"(?:/[A-Za-z0-9_-][A-Za-z0-9._-]{0,47}){1,2}"
+    r"(?![\w./@+-])"
+)
+
 _CODIGOS_RD = ("809", "829", "849")
 # Con la barra y los guiones largos, que ahora también juntan una tira: una
 # fecha no es de nadie y al modelo le sirve.
@@ -489,6 +510,18 @@ def _que_numero_es(tira: str) -> str | None:
     if len(digitos) == 10 or "(" in tira:
         return "TELEFONO"
     return "NUMERO"
+
+
+def _no_es_un_codigo(tira: str) -> bool:
+    """Si una tira de dígitos de adentro de un enlace de plan es un teléfono
+    de aquí o una cédula escrita como tal: eso no lo tiene ningún código del
+    catálogo, y se tapa aunque venga en el enlace."""
+    digitos = re.sub(r"\D", "", tira)
+    return bool(
+        _CEDULA.fullmatch(tira)
+        or (len(digitos) == 10 and digitos[:3] in _CODIGOS_RD)
+        or (len(digitos) == 11 and digitos[0] == "1" and digitos[1:4] in _CODIGOS_RD)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -850,6 +883,16 @@ class Mascara:
 
 
 def _tramos_por_forma(texto: str) -> Iterator[_Tramo]:
+    if "studiante.app/l/p/" in texto:
+        for enlace in _ENLACE_DE_PLAN.finditer(texto):
+            for m in _TIRA.finditer(enlace.group(0)):
+                if _no_es_un_codigo(m.group(0)):
+                    yield _Tramo(enlace.start() + m.start(), enlace.start() + m.end(), _que_numero_es(m.group(0)))
+        # Y el resto del enlace se cambia por un carácter que ninguna forma
+        # usa, del mismo largo para no mover las posiciones: adentro no se
+        # tapa nada más, y lo que venga afuera («…/6320-023 8095551234») se
+        # busca solo, sin juntarse con los dígitos del enlace.
+        texto = _ENLACE_DE_PLAN.sub(lambda m: "\0" * len(m.group(0)), texto)
     for m in _CORREO.finditer(texto):
         yield _Tramo(m.start(), m.end(), "CORREO")
     for m in _CORREO_FLOJO.finditer(texto):
