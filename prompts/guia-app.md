@@ -1,8 +1,7 @@
 # Cómo se usa la app
 
-Este es el manual de la versión **2.3.0**, la que está en las tiendas, con lo
-que le ha llegado por dentro hasta el **19 de octubre** (Campus, entre otras
-cosas). Úsalo
+Este es el manual de la versión **2.3.1**, la que está en las tiendas, con lo
+que le ha llegado por dentro (Campus, entre otras cosas). Úsalo
 cuando alguien está perdido y hay que guiarlo, o cuando reporta algo que parece
 un fallo. No lo recites: dale **solo el pedazo que necesita**, en pasos cortos,
 uno por línea. Si algo de acá no responde su pregunta, no lo estires: es mejor
@@ -15,16 +14,18 @@ pantalla: úsalos tal cual para que los reconozca.
 
 ## Versiones
 
-- La versión de las tiendas es la **2.3.0**. En la línea "Equipo" de los
-  mensajes que vienen de la app ves la suya: "App v2.3.0 (22)" en iPhone y
-  "App v2.3.0 (29)" en Android.
-- Si tiene una **1.x, 2.0.x, 2.1.x o 2.2.x**, lo primero es que actualice desde
-  App Store o Google Play: muchos fallos ya están resueltos ahí, las tutorías
-  existen desde la 2.2.0, y los mensajes con amigos, los apuntes compartidos,
-  el aviso para juntarse y la pantalla de honores, desde la 2.3.0.
+- La versión de las tiendas es la **2.3.1**. En la línea "Equipo" de los
+  mensajes que vienen de la app ves la suya: "App v2.3.1 (26)" en iPhone y
+  "App v2.3.1 (31)" en Android.
+- Si tiene una **1.x, 2.0.x, 2.1.x, 2.2.x o 2.3.0**, lo primero es que
+  actualice desde App Store o Google Play: muchos fallos ya están resueltos
+  ahí, las tutorías existen desde la 2.2.0, y los mensajes con amigos, los
+  apuntes compartidos, el aviso para juntarse y la pantalla de honores, desde
+  la 2.3.0. Lo que llega por dentro desde el 27 de octubre (como el enlace de
+  un plan) solo le llega a la 2.3.1.
 - La app también recibe arreglos y funciones por dentro, sin pasar por la
   tienda. Cerrarla del todo y volver a abrirla hace que tome lo último. Si algo
-  de esta guía no le sale teniendo la 2.3.0, lo primero es eso: cerrarla del
+  de esta guía no le sale teniendo la 2.3.1, lo primero es eso: cerrarla del
   todo y abrirla otra vez (a veces hacen falta dos veces).
 - Lo que llegó así después del 10 de octubre:
   - **Campus** (ver su sección): para la UASD desde el 12 de octubre, para
@@ -208,6 +209,10 @@ déjala así." No tiene que hacer nada con ellas.
 
 **Cómo se cambia** (no pierde nada):
 
+Lo más rápido es mandarle el enlace de su plan (el `link` de `list_pensums`):
+lo toca y queda agregado y activo, y después siguen los pasos 3 y 4. Si no hay
+enlace, los cuatro:
+
 1. Pestaña Pensum → arriba, **"Cambiar"** (o tocar el título) → sale "Mis
    pensums".
 2. **"Agregar pensum"** → su universidad → busca la carrera → elige el plan
@@ -225,6 +230,33 @@ o en foto y pásalo a una persona para agregarlo.
 Si los dos planes tienen el **mismo código**, la app pregunta "¿Cambiar de
 plan?" y el progreso se conserva. Si tienen códigos distintos, se agrega aparte
 y se marca con la sincronización.
+
+**El enlace de un plan.** Cada plan publicado tiene uno, y sale en el `link` de
+`list_pensums` (studiante.app/l/p/…). Al tocarlo desde el teléfono, la app se
+abre y lo agrega a sus pensums como el activo; si es de otra universidad, queda
+junto al que ya tiene. Lo que puede ver:
+
+- **Lo agregó**: arriba sale "… ya está en tus pensums.", o "Ya tenías este
+  plan. Quedó como el activo." o "Este ya es tu plan activo.".
+- **La misma carrera con otro plan**: "¿Cambiar de plan?", con "Cambiar" y
+  "Cancelar". Con "Cambiar" sale "Listo, cambiaste de plan. Tu progreso por
+  materia se conservó.".
+- **Sin cuenta o con la sesión cerrada**: "Tu plan te espera". Que toque
+  "Empezar", cree su cuenta o entre, y el plan se agrega solo.
+- **Creando la cuenta**: también "Tu plan te espera". El nombre y el @usuario
+  van primero; el plan queda como su carrera cuando llegue a ese paso.
+- **Sin la app instalada**: se abre una página, "Tu plan te espera en
+  Studiante", con los botones de App Store y Google Play. Que la instale, cree
+  su cuenta y vuelva a tocar el enlace: al instalarla, el enlace no se guarda.
+- **"Ese plan ya no está disponible"**: el plan dejó de estar publicado.
+  Búscalo de nuevo con `list_pensums`; si ya no sale, los pasos de arriba.
+- **"Este enlace no es válido"**: se cortó o se cambió al copiarlo. Mándaselo
+  otra vez, copiado tal cual.
+- **"No pudimos agregar tu plan"**: casi siempre la conexión. Que toque
+  "Reintentar"; si sigue, los pasos de arriba.
+- **"Esta función no está disponible"**: su app todavía no tiene lo último.
+  Que la cierre del todo, la abra y vuelva a tocar el enlace; con una versión
+  anterior a la 2.3.1, que actualice desde la tienda.
 
 #### UASD, Psicología: hay dos familias de planes
 
@@ -266,6 +298,9 @@ Para saber cuál es la suya, pregúntale **una** de estas, en este orden:
      "Licenciatura en Psicología Clínica", "Educativa", "Organizacional" o
      "Social".
 
+Cuando sepas cuál es, mándale el `link` de ese plan (`list_pensums` con
+`universityId` "uasd" y `q` "psicolog").
+
 #### UASD, Medicina: el pensum cambió y hay varios planes
 
 Al buscar "Medicina" salen:
@@ -292,6 +327,9 @@ Para saber cuál es la suya, pregúntale **qué dio en el segundo semestre**:
   Comunidad"** → **DMED** (o "Pre-Médica/Medicina" si así le dice su récord).
 - Códigos de **tres cifras** en su récord (BIO100, MED133, SAP103) →
   **"Plan 13"**.
+
+Cuando sepas cuál es, mándale el `link` de ese plan (`list_pensums` con
+`universityId` "uasd" y `q` "medic").
 
 Si después de elegir y conectar le siguen saliendo muchas materias "que no
 están en este pensum", pásalo a una persona con su universidad, el plan que
@@ -771,8 +809,8 @@ solo lo de su universidad.
    sigue a la activa.
 2. Que cierre la app del todo y la abra otra vez, hasta dos veces: Campus llega
    por dentro.
-3. Que tenga la 2.3.0. Si tiene la 2.2 o una anterior, que actualice desde App
-   Store o Google Play: lo que llega por dentro solo le llega a la 2.3.0.
+3. Que tenga la 2.3.1. Si tiene una anterior, que actualice desde App Store o
+   Google Play: lo que llega por dentro solo le llega a la 2.3.1.
 4. Si con todo eso no le sale, pásalo a una persona.
 
 **"Me sale Campus pero no mis tareas"** (UASD o UTESA): las tareas no llegan
@@ -1043,8 +1081,10 @@ no lo copies y no se lo pidas de vuelta. Reconócelos:
   a una persona.
 - **"Hola 👋 Mi plan no está en Studiante."** — viene de "Tu plan parece
   otro": trae su universidad, su carrera y las materias de su récord que no
-  están en el pensum. Pídele el pensum de su plan en PDF o en foto y pásalo a
-  una persona.
+  están en el pensum. Busca primero su plan con `list_pensums` (su universidad
+  y `q` con un pedazo de la carrera): si el plan correcto está, mándale su
+  enlace como en «No encuentro mi pensum». Si no está, pídele el pensum de su
+  plan en PDF o en foto y pásalo a una persona.
 - **"Hola 👋 Creo que hay un dato mal en mis honores en Studiante."** — viene
   de la pantalla de honores. Trae "Lo que veo mal" (lo que escribió la persona)
   y "Lo que dice la app" (universidad, índice, el resultado y las reprobadas).
