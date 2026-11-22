@@ -210,8 +210,8 @@ déjala así." No tiene que hacer nada con ellas.
 **Cómo se cambia** (no pierde nada):
 
 Lo más rápido es mandarle el enlace de su plan (el `link` de `list_pensums`):
-lo toca y queda agregado y activo, y después siguen los pasos 3 y 4. Si no hay
-enlace, los cuatro:
+lo toca, le da a «Agregar» y queda agregado y activo, y después siguen los
+pasos 3 y 4. Si no hay enlace, los cuatro:
 
 1. Pestaña Pensum → arriba, **"Cambiar"** (o tocar el título) → sale "Mis
    pensums".
@@ -233,18 +233,26 @@ y se marca con la sincronización.
 
 **El enlace de un plan.** Cada plan publicado tiene uno, y sale en el `link` de
 `list_pensums` (studiante.app/l/p/…). Al tocarlo desde el teléfono, la app se
-abre y lo agrega a sus pensums como el activo; si es de otra universidad, queda
-junto al que ya tiene. Lo que puede ver:
+abre y le enseña el plan (carrera, mención y universidad) antes de cambiar
+nada; con un toque lo agrega a sus pensums como el activo. Si es de otra
+universidad, queda junto al que ya tiene. Lo que puede ver:
 
-- **Lo agregó**: arriba sale "… ya está en tus pensums.", o "Ya tenías este
-  plan. Quedó como el activo." o "Este ya es tu plan activo.".
-- **La misma carrera con otro plan**: "¿Cambiar de plan?", con "Cambiar" y
+- **"Agregar a tus pensums"**, con «Agregar» y «Ahora no». Con «Agregar» sale
+  arriba "… ya está en tus pensums.". Si no es su plan, «Ahora no» no cambia
+  nada.
+- **"Ya tienes este plan"**, con «Usar este plan»: lo deja como el activo
+  ("Ya tenías este plan. Quedó como el activo."). Si ya era el activo, la app
+  no pregunta y dice "Este ya es tu plan activo.".
+- **"¿Cambiar de plan?"**: la misma carrera con otro plan, con "Cambiar" y
   "Cancelar". Con "Cambiar" sale "Listo, cambiaste de plan. Tu progreso por
   materia se conservó.".
 - **Sin cuenta o con la sesión cerrada**: "Tu plan te espera". Que toque
-  "Empezar", cree su cuenta o entre, y el plan se agrega solo.
+  "Empezar", cree su cuenta o entre, y la app le vuelve a enseñar el plan para
+  agregarlo con un toque. Espera un día: si tarda más, que toque el enlace
+  otra vez.
 - **Creando la cuenta**: también "Tu plan te espera". El nombre y el @usuario
-  van primero; el plan queda como su carrera cuando llegue a ese paso.
+  van primero; al llegar al paso de la carrera sale "Tu carrera" con ese plan,
+  «Usar este plan» o «Elegir otro».
 - **Sin la app instalada**: se abre una página, "Tu plan te espera en
   Studiante", con los botones de App Store y Google Play. Que la instale, cree
   su cuenta y vuelva a tocar el enlace: al instalarla, el enlace no se guarda.

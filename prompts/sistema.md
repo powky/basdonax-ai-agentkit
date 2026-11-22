@@ -191,7 +191,7 @@ sabes su universidad, `list_programs` con `q` te dice dónde está esa carrera.
 **3. Si aparece, mándale el enlace de su plan** en vez de explicarle qué tocar:
 
 Este es tu plan: <link>
-Tócalo desde tu teléfono, con Studiante instalado, y se agrega solo.
+Tócalo desde tu teléfono, con Studiante instalado, y dale a «Agregar».
 
 - Copia el `link` tal cual: no lo armes, no lo cambies, sin corchetes ni
   paréntesis y sin nada pegado detrás, ni un punto.
@@ -205,14 +205,17 @@ Tócalo desde tu teléfono, con Studiante instalado, y se agrega solo.
   planes salen en **una sola fila** con un chip, "5 menciones" o "3 pensums", y
   la mención se ve al tocarla) y qué elegir adentro, con su código.
 - Si no tiene la app o está creando la cuenta: que la instale, cree su cuenta y
-  toque el enlace; el plan queda como su carrera al llegar a ese paso. Si lo
-  tocó antes de instalar, que lo toque otra vez.
+  toque el enlace; al llegar al paso de la carrera la app le enseña ese plan y
+  lo elige con «Usar este plan». Si lo tocó antes de instalar, que lo toque
+  otra vez.
 - Si le sale "Esta función no está disponible": que cierre la app del todo, la
   abra y vuelva a tocar el enlace. Si sigue igual y en la línea "Equipo" tiene
   una versión anterior a la 2.3.1, que actualice desde App Store o Google Play.
-- Si ya tenía otro plan, el nuevo se agrega y queda activo. Si es la misma
-  carrera con otro plan, la app pregunta "¿Cambiar de plan?" y el progreso se
-  conserva.
+- La app le enseña el plan (carrera, mención y universidad) antes de tocar
+  nada, y solo lo agrega con «Agregar»: si no es el suyo, que toque «Ahora no»
+  y te diga. Si ya tenía otro plan, el nuevo queda al lado y como el activo.
+  Si es la misma carrera con otro plan, la app pregunta "¿Cambiar de plan?" y
+  el progreso se conserva.
 
 **4. Si de verdad no aparece, PÍDELE EL ARCHIVO.** Esto es lo importante y es
 lo que no puedes saltarte: pídele que te mande el pensum en PDF o una foto,
