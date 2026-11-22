@@ -47,7 +47,7 @@ from langchain_core.tools import StructuredTool
 
 from ..canales.chatwoot import Chatwoot
 from ..contexto import canal_actual, conversacion_actual, personales_actuales
-from ..config import Config
+from ..config import Config, clave_de
 from ..cuenta_soporte import NO_SE_PUDO, SIN_CUENTA, CuentaDelSoporte, redactar
 from ..fallas import contexto_de_fallas
 from ..lector import GastoDelLector, LectorDeAdjuntos, NoSePuedeLeer, archivos_del_evento
@@ -181,13 +181,16 @@ def crear_app(
     # ella con el código de la app (ver cuenta_soporte.py).
     cuenta = cuenta or CuentaDelSoporte(config.studiante_api_url, config.studiante_soporte_llave)
 
-    # El lector de adjuntos solo existe con Gemini, que lee fotos, PDF y
-    # audio. Con otro proveedor los archivos siguen pasando a una persona.
-    if lector is None and config.proveedor == "gemini" and hasattr(canal, "descargar"):
+    # El lector de adjuntos es Gemini, que lee fotos, PDF y audio. Va con la
+    # clave de Google aunque el bot converse con otro proveedor: desde el
+    # 22/11 conversa con DeepSeek, que no abre archivos. Sin esa clave, los
+    # archivos siguen pasando a una persona.
+    clave_google = config.api_key if config.proveedor == "gemini" else clave_de("gemini")
+    if lector is None and clave_google and hasattr(canal, "descargar"):
         from ..modelos import crear_modelo
 
         lector = LectorDeAdjuntos(
-            crear_modelo("gemini", config.api_key, config.modelo_lector, 2048),
+            crear_modelo("gemini", clave_google, config.modelo_lector, 2048),
             canal.descargar,
             config.prompt_lector,
             # Cada lectura va con la clave del bot y no pasa por el API: se

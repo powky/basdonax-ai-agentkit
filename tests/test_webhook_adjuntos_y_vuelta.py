@@ -337,3 +337,83 @@ def test_con_gemini_el_lector_le_cuenta_su_gasto_al_api(monkeypatch):
     assert isinstance(gasto, GastoDelLector) and gasto.configurado()
     assert gasto.url == "https://api.ejemplo.com/api/v1/agent/support/ai/usage"
     assert gasto.llave == "llave-del-bot"
+
+
+def test_con_deepseek_el_lector_usa_la_clave_de_google(monkeypatch):
+    """El bot conversa con DeepSeek, pero los archivos los sigue leyendo Gemini."""
+    import agente.modelos as modelos
+    import agente.web.webhook as modulo
+
+    armados = []
+    claves = []
+
+    class LectorQueAnota:
+        def __init__(self, modelo, descargar, instrucciones, gasto=None):
+            armados.append(modelo)
+
+    def crear(proveedor, clave, modelo, tope):
+        claves.append((proveedor, clave))
+        return object()
+
+    monkeypatch.setattr(modulo, "LectorDeAdjuntos", LectorQueAnota)
+    monkeypatch.setattr(modelos, "crear_modelo", crear)
+    monkeypatch.setenv("GOOGLE_API_KEY", "clave-de-google")
+    config = Config(
+        proveedor="deepseek",
+        modelo="deepseek-flash",
+        api_key="llave-del-bot",
+        max_tokens=1024,
+        memoria_mensajes=20,
+        prompt_sistema=RAIZ / "prompts/sistema.md",
+        chatwoot_url="https://ws.ejemplo.com",
+        chatwoot_token="token",
+        chatwoot_webhook_token=TOKEN,
+        buffer_segundos=0,
+        studiante_api_url="https://api.ejemplo.com/api/v1",
+        studiante_soporte_llave="llave-del-bot",
+    )
+
+    class CanalQueDescarga(Canal):
+        def descargar(self, url, tope):
+            raise AssertionError("no debería bajar nada")
+
+    modulo.crear_app(config, agente=AgenteQueAnota(), canal=CanalQueDescarga(), ajustes=AjustesFijos())
+
+    assert len(armados) == 1
+    assert claves == [("gemini", "clave-de-google")]
+
+
+def test_con_deepseek_y_sin_clave_de_google_no_hay_lector(monkeypatch):
+    """Sin la clave de Google, los archivos pasan a una persona, como antes."""
+    import agente.web.webhook as modulo
+
+    armados = []
+
+    class LectorQueAnota:
+        def __init__(self, *a, **k):
+            armados.append(1)
+
+    monkeypatch.setattr(modulo, "LectorDeAdjuntos", LectorQueAnota)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    config = Config(
+        proveedor="deepseek",
+        modelo="deepseek-flash",
+        api_key="llave-del-bot",
+        max_tokens=1024,
+        memoria_mensajes=20,
+        prompt_sistema=RAIZ / "prompts/sistema.md",
+        chatwoot_url="https://ws.ejemplo.com",
+        chatwoot_token="token",
+        chatwoot_webhook_token=TOKEN,
+        buffer_segundos=0,
+        studiante_api_url="https://api.ejemplo.com/api/v1",
+        studiante_soporte_llave="llave-del-bot",
+    )
+
+    class CanalQueDescarga(Canal):
+        def descargar(self, url, tope):
+            raise AssertionError("no debería bajar nada")
+
+    modulo.crear_app(config, agente=AgenteQueAnota(), canal=CanalQueDescarga(), ajustes=AjustesFijos())
+
+    assert armados == []
