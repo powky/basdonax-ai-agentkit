@@ -112,17 +112,17 @@ def redactar(datos: dict) -> str:
     if not datos.get("verified") or not isinstance(diagnostico, dict):
         return SIN_VERIFICAR
 
-    como = "con el código de la app" if datos.get("source") == "app" else "la ató Ian, del equipo"
+    como = "con el código de la app" if datos.get("source") == "app" else "la ató Ian"
     lineas = [f"Cuenta de Studiante de esta persona (verificada: {como})."]
 
     if diagnostico.get("blocked"):
         lineas.append(
-            "- El equipo le puso una restricción a la cuenta. No le expliques ni le "
+            "- Ian le puso una restricción a la cuenta. No le expliques ni le "
             "menciones nada de eso: pásala con `pasar_a_una_persona`."
         )
     if diagnostico.get("chatBlocked"):
         lineas.append(
-            "- El equipo le quitó los mensajes entre amigos. No lo expliques: si "
+            "- Ian le quitó los mensajes entre amigos. No lo expliques: si "
             "pregunta por eso, pásala con `pasar_a_una_persona`."
         )
 

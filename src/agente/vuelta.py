@@ -135,12 +135,12 @@ def contexto_de_la_vuelta(mensajes: list[dict], etiqueta: str = "humano", cuanto
             # saldría al modelo.
             corte = texto.rfind(" ", 0, 301)
             texto = (texto[:corte] if corte > 0 else "") + "…"
-        nombre = {"persona": "La persona", "bot": "Tú (el bot)", "ian": "Ian, del equipo"}[quien]
+        nombre = {"persona": "La persona", "bot": "Tú (el bot)", "ian": "Ian"}[quien]
         lineas.append(f"{nombre}: {texto}")
     if not lineas:
         return ""
     return (
-        "[contexto: esta conversación la venía atendiendo Ian, del equipo, y la "
+        "[contexto: esta conversación la venía atendiendo Ian, y la "
         "persona volvió a escribir más de un día después. Lo último que se habló:\n"
         + "\n".join(lineas)
         + "\n— fin del contexto. Lo que sigue es lo que escribió ahora.]"

@@ -93,7 +93,9 @@ def test_el_contexto_cuenta_lo_ultimo_que_se_hablo():
     mensajes = traspasada() + [sale(500, "Listo, ya lo agregué. Búscalo como Mercadotecnia 2019.")]
     contexto = contexto_de_la_vuelta(mensajes)
     assert contexto.startswith("[contexto:")
-    assert "Ian, del equipo: Listo, ya lo agregué." in contexto
+    assert "Ian: Listo, ya lo agregué." in contexto
+    assert "la venía atendiendo Ian, y la persona volvió" in contexto
+    assert "Ian, del equipo" not in contexto, "Studiante es una persona: Ian, no «el equipo»"
     assert "La persona: acá está mi pensum" in contexto
     assert "Hay que abrirlos a mano" not in contexto, "las notas internas no se le cuentan"
     assert contexto.rstrip().endswith("]")

@@ -209,9 +209,16 @@ déjala así." No tiene que hacer nada con ellas.
 
 **Cómo se cambia** (no pierde nada):
 
-Lo más rápido es mandarle el enlace de su plan (el `link` de `list_pensums`):
-lo toca, le da a «Agregar» y queda agregado y activo, y después siguen los
-pasos 3 y 4. Si no hay enlace, los cuatro:
+Lo más rápido es mandarle el enlace de su plan (el `link` de `list_pensums`).
+Lo toca y la app le enseña el plan:
+
+- Si el correcto tiene **otro código** que el equivocado, le da a «Agregar»,
+  queda agregado y activo, y después siguen los pasos 3 y 4.
+- Si tiene **el mismo código**, la app pregunta "¿Cambiar de plan?" y el botón
+  es «Cambiar»: el correcto reemplaza al equivocado y el progreso se conserva.
+  No queda ninguno que borrar, así que solo sigue el paso 4.
+
+Si no hay enlace, los cuatro:
 
 1. Pestaña Pensum → arriba, **"Cambiar"** (o tocar el título) → sale "Mis
    pensums".
@@ -253,18 +260,38 @@ universidad, queda junto al que ya tiene. Lo que puede ver:
 - **Creando la cuenta**: también "Tu plan te espera". El nombre y el @usuario
   van primero; al llegar al paso de la carrera sale "Tu carrera" con ese plan,
   «Usar este plan» o «Elegir otro».
-- **Sin la app instalada**: se abre una página, "Tu plan te espera en
-  Studiante", con los botones de App Store y Google Play. Que la instale, cree
-  su cuenta y vuelva a tocar el enlace: al instalarla, el enlace no se guarda.
+- **Una página web, "Tu plan te espera en Studiante"**, con los botones de App
+  Store y Google Play. Sale sin la app instalada, pero también a quien sí la
+  tiene, si tocó el enlace dentro de otra app (Instagram, Facebook) que lo
+  abre en su propio navegador. Si ya tiene Studiante, que toque «Abrir en la
+  app», abajo, donde dice "¿Ya la tienes?"; no le digas que la instale. Si no
+  la tiene, que la instale, cree su cuenta y vuelva a tocar el enlace: al
+  instalarla, el enlace no se guarda. Si entonces le sale una pantalla en
+  inglés, es la del último punto.
 - **"Ese plan ya no está disponible"**: el plan dejó de estar publicado.
-  Búscalo de nuevo con `list_pensums`; si ya no sale, los pasos de arriba.
+  Búscalo de nuevo con `list_pensums`: si sale, mándale el `link` que trae
+  ahora. Si ya no sale, tampoco está en "Agregar pensum", así que no le des los
+  pasos de arriba: pídele el pensum en PDF o en foto, como en el paso 4 de «No
+  encuentro mi pensum».
 - **"Este enlace no es válido"**: se cortó o se cambió al copiarlo. Mándaselo
   otra vez, copiado tal cual.
-- **"No pudimos agregar tu plan"**: casi siempre la conexión. Que toque
-  "Reintentar"; si sigue, los pasos de arriba.
-- **"Esta función no está disponible"**: su app todavía no tiene lo último.
-  Que la cierre del todo, la abra y vuelva a tocar el enlace; con una versión
-  anterior a la 2.3.1, que actualice desde la tienda.
+- **"No pudimos agregar tu plan"**: mira lo que dice debajo. Si dice "Revisa
+  tu conexión e inténtalo de nuevo.", es la conexión: que toque "Reintentar";
+  si sigue, los pasos de arriba. Si dice otra cosa, ese es el motivo, y
+  "Reintentar" y los pasos de arriba fallan igual: sigue lo que dice.
+  - "Llegaste al límite diario de pensums distintos…", o cualquier otro que
+    termine en "Vuelve a intentarlo mañana.": que lo intente mañana. Sus
+    pensums siguen como estaban.
+  - "No pudimos verificar este teléfono con Apple o Google…": que cierre la
+    app y la abra de nuevo en un par de minutos.
+  - "Tu cuenta está bloqueada…": no lo expliques; pásala con
+    `pasar_a_una_persona`.
+- **"Esta función no está disponible"**, o una pantalla en inglés que dice
+  **"Unmatched Route"** y **"Page could not be found."**: su app todavía no
+  tiene lo último. La de inglés sale con la 2.3.0 o una anterior, y también con
+  la 2.3.1 recién instalada, mientras no le baja lo último. Que la cierre del
+  todo, la abra otra vez y vuelva a tocar el enlace (a veces hacen falta dos
+  veces); con una versión anterior a la 2.3.1, que actualice desde la tienda.
 
 #### UASD, Psicología: hay dos familias de planes
 

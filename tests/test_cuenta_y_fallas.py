@@ -92,10 +92,15 @@ def test_la_cuenta_verificada_en_renglones():
 
 
 def test_lo_que_no_se_explica():
-    diag = dict(DIAGNOSTICO, blocked=True, appCheck={"platform": "android", "code": "UNRECOGNIZED_VERSION", "lastAt": "2026-11-15T10:00:00Z"})
+    diag = dict(DIAGNOSTICO, blocked=True, chatBlocked=True, appCheck={"platform": "android", "code": "UNRECOGNIZED_VERSION", "lastAt": "2026-11-15T10:00:00Z"})
     texto = redactar({"linked": True, "verified": True, "source": "ian", "diagnosis": diag})
     assert "la ató Ian" in texto
+    assert "Ian le puso una restricción a la cuenta" in texto
+    assert "Ian le quitó los mensajes entre amigos" in texto
     assert "No le expliques ni le menciones nada de eso" in texto
+    # El modelo copia lo que lee: con «el equipo» acá, lo diría aunque el
+    # prompt se lo prohíba (Studiante es una persona, Ian).
+    assert "equipo" not in texto.lower()
     assert "no pudo demostrar que es la original (Android, UNRECOGNIZED_VERSION)" in texto
 
 

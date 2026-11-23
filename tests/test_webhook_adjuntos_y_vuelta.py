@@ -252,7 +252,7 @@ def test_si_escribe_un_dia_despues_de_ian_lo_retoma_el_bot():
 
     assert canal.devueltas == [("42", NOTA_DE_LA_VUELTA)]
     (texto,) = agente.recibido
-    assert texto.startswith("[contexto:") and "Ian, del equipo: Ya lo corregí" in texto
+    assert texto.startswith("[contexto:") and "Ian: Ya lo corregí" in texto
     assert texto.endswith("ahora tengo otra pregunta")
 
 
