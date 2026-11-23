@@ -54,7 +54,7 @@ SIN_VERIFICAR = (
 
 NO_SE_PUDO = (
     "No se pudo leer su cuenta en este momento. No inventes nada de su cuenta "
-    "ni le digas cómo está: dile que lo revisas con el equipo y usa "
+    "ni le digas cómo está: dile que lo revisas y usa "
     "`pasar_a_una_persona` con lo que pregunta."
 )
 

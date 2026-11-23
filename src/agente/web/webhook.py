@@ -214,8 +214,8 @@ def crear_app(
         """La deja anotada; el traspaso lo hace el webhook al terminar."""
         traspaso.pedir(conversacion_actual.get(), motivo)
         return (
-            "Listo: la conversación queda para el equipo. Decile a la persona "
-            "que alguien la retoma, sin prometer cuándo, y no sigas intentando "
+            "Listo: la conversación queda para Ian. Decile a la persona que Ian "
+            "la retoma por aquí, sin prometer cuándo, y no sigas intentando "
             "resolverlo vos."
         )
 
@@ -223,12 +223,12 @@ def crear_app(
         func=pedir_una_persona,
         name="pasar_a_una_persona",
         description=(
-            "Deja la conversación para que la siga alguien del equipo. Úsala "
+            "Deja la conversación para que la siga Ian, una persona. Úsala "
             "cuando el tema no lo podés resolver vos: piden hablar con una "
             "persona, están molestos, reclaman datos incorrectos, piden que "
             "conectemos una universidad o un portal nuevo, o es prensa, una "
             "universidad, algo comercial o legal. El `motivo` es una nota "
-            "interna que solo ve el equipo: escribí en una línea qué necesita "
+            "interna que solo ve Ian: escribí en una línea qué necesita "
             "y con qué datos, no la conversación entera."
         ),
     )
@@ -280,7 +280,7 @@ def crear_app(
         name="guardar_nombre",
         description=(
             "Guarda el nombre de la persona con la que estás hablando, para que "
-            "el equipo la vea por su nombre y no por su número. Úsala apenas te "
+            "Ian la vea por su nombre y no por su número. Úsala apenas te "
             "lo diga, una sola vez por conversación."
         ),
     )
@@ -365,8 +365,8 @@ def crear_app(
                 aviso = f"{type(e).__name__}: {e}"
                 registro.error("[%s] %s", conversacion, aviso)
                 mensajes = [
-                    "Se me complicó procesarlo ahora mismo. Ya alguien del "
-                    "equipo lo retoma 🙏🏻"
+                    "Se me complicó procesarlo ahora mismo. Ian lo retoma "
+                    "por aquí 🙏🏻"
                 ]
                 traspaso.pedir(
                     conversacion,

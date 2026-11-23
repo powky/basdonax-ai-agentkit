@@ -158,7 +158,7 @@ def _envolver(tool):
             return (
                 "No se pudo consultar el catálogo de Studiante en este momento. "
                 "No inventes la respuesta ni afirmes que algo no está: decile a "
-                "la persona que lo vas a confirmar con el equipo."
+                "la persona que lo vas a revisar."
             )
 
     tool.func = sincrono
